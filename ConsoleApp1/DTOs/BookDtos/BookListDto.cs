@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace LibrarySystem.DTOs.BookDtos
+{
+    public class BookListDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public int AvailableCopies { get; set; }
+    }
+
+}
