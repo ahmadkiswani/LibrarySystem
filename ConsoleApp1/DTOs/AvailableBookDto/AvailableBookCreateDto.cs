@@ -9,5 +9,6 @@ namespace LibrarySystem.DTOs.AvailableBookDto
     {
         [Required]
         public int BookId { get; set; }
+
     }
 }

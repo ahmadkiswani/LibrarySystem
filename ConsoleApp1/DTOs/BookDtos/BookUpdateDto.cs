@@ -7,6 +7,9 @@ namespace LibrarySystem.DTOs.BookDtos
 {
     public class BookUpdateDto
     {
+        [Required]  
+        public int Id { get; set; }
+
         [Required]
         [StringLength(150, MinimumLength = 2)]
         public string Title { get; set; }
@@ -20,9 +23,8 @@ namespace LibrarySystem.DTOs.BookDtos
 
         [Required]
         [Range(1, 2000)]
-        public int TotalCopies { get; set; }
 
-        [Required]
+      
         public int AuthorId { get; set; }
 
         [Required]

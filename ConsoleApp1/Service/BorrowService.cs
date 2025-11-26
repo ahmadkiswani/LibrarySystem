@@ -9,11 +9,11 @@ namespace LibrarySystem.Service
     public class BorrowService
     {
         private List<Borrow> _borrow;
-        private List<AvailableBook> _inventory;
+        private List<BookCopy> _inventory;
         private List<User>_user;
         private int _idCounter = 1;
 
-        public BorrowService(List<Borrow> borrow, List<AvailableBook> inventory,List<User>user)
+        public BorrowService(List<Borrow> borrow, List<BookCopy> inventory,List<User>user)
         {
             _borrow = borrow;
             _inventory = inventory;
@@ -21,7 +21,7 @@ namespace LibrarySystem.Service
         }
         public void BorrowBook(BorrowCreateDto dto)
         {
-            var copy = _inventory.FirstOrDefault(x => x.Id == dto.AvailableBookId);
+            var copy = _inventory.FirstOrDefault(x => x.Id == dto.BookCopyId);
 
             if (copy == null || !copy.IsAvailable)
                 throw new Exception("This copy is not available");
@@ -34,17 +34,33 @@ namespace LibrarySystem.Service
             Borrow b = new Borrow();
             b.Id = _idCounter++;
             b.UserId = dto.UserId;
-            b.AvailableBookId = dto.AvailableBookId;
-            b.BorrowDate = dto.BorrowDate;
-            b.DueDate = dto.DueDate;
+            b.BookCopyId = dto.BookCopyId;
+            b.BorrowDate = DateTime.Now;
+            b.DueDate = DateTime.Now.AddDays(5);  
+
             b.CreatedBy = 1;
             b.CreatedDate = DateTime.Now;
             _borrow.Add(b);
+            var user = _user.FirstOrDefault(u => u.Id == dto.UserId);
+
+            if (user != null)
+            {
+                if (user.Borrows == null)
+                    user.Borrows = new List<Borrow>();
+
+                user.Borrows.Add(b);
+            }
+            if (copy.BorrowRecords == null)
+                copy.BorrowRecords = new List<Borrow>();
+
+            copy.BorrowRecords.Add(b);
+
+
         }
 
-        public void ReturnBook(int borrowId, BorrowReturnDto dto)
+        public void ReturnBook( BorrowReturnDto dto)
         {
-            Borrow b = _borrow.FirstOrDefault(z => z.Id == borrowId);
+            var b = _borrow.FirstOrDefault(z => z.Id == dto.Id);
 
             if (b == null)
                 throw new Exception("Borrow record not found");
@@ -52,11 +68,11 @@ namespace LibrarySystem.Service
             if (b.ReturnDate != null)
                 throw new Exception("This book is already returned");
 
-            b.ReturnDate = dto.ReturnDate;
+            b.ReturnDate = DateTime.Now;
             b.LastModifiedBy = 1;
             b.LastModifiedDate = DateTime.Now;
 
-            var copy = _inventory.FirstOrDefault(x => x.Id == b.AvailableBookId);
+            var copy = _inventory.FirstOrDefault(x => x.Id == b.BookCopyId);
 
             if (copy != null)
             {
@@ -64,6 +80,10 @@ namespace LibrarySystem.Service
                 copy.LastModifiedBy = 1;
                 copy.LastModifiedDate = DateTime.Now;
             }
+        }
+        public List<Borrow> GetBorrowedBooksByUser(int userId)
+        {
+            return _borrow.Where(b => b.UserId == userId).ToList();
         }
 
         public void CheckOverdue()

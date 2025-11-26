@@ -7,24 +7,36 @@ using System.Linq;
 
 namespace LibrarySystem.Service
 {
-    public class AvailableBookService
+    public class BookCopySservice
     {
-        private List<AvailableBook> _inventory;
+        private List<BookCopy> _inventory;
+        private List<Book> _books;
+
         private int _idCounter = 1;
 
-        public AvailableBookService(List<AvailableBook> inventory)
+        public BookCopySservice(List<BookCopy> inventory, List<Book> books)
         {
             _inventory = inventory;
+            _books = books;
         }
-
         public void AddAvailableBook(AvailableBookCreateDto dto)
         {
-            AvailableBook a = new AvailableBook();
+            BookCopy a = new BookCopy();
             a.Id = _idCounter++;
             a.BookId = dto.BookId;
             a.CreatedBy = 1;
             a.CreatedDate = DateTime.Now;
             _inventory.Add(a);
+            var book = _books.FirstOrDefault(b => b.Id == dto.BookId);
+
+            if (book != null)
+            {
+                if (book.Copies == null)
+                    book.Copies = new List<BookCopy>();
+
+                book.Copies.Add(a);
+            }
+
         }
 
         public List<AvailableBookListDto> ListAvailableBooks()
@@ -51,12 +63,12 @@ namespace LibrarySystem.Service
                 return _inventory.Count(x => x.BookId == bookId && !x.IsAvailable);
             }
 
-            public List<AvailableBook> GetAllCopiesForBook(int bookId)
+            public List<BookCopy> GetAllCopiesForBook(int bookId)
             {
                 return _inventory.Where(x => x.BookId == bookId).ToList();
             }
 
-            public AvailableBook GetSpecificCopy(int availableBookId)
+            public BookCopy GetSpecificCopy(int availableBookId)
             {
                 return _inventory.FirstOrDefault(x => x.Id == availableBookId);
             }

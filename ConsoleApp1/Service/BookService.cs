@@ -10,14 +10,14 @@ namespace LibrarySystem.Service
     public class BookService
     {
         private readonly List<Book> _books;
-        private readonly AvailableBookService _availableBookService;
+        private readonly BookCopySservice _bookCopyService;
         private int _idCounter = 1;
 
 
-        public BookService(List<Book> books, AvailableBookService availableBookService)
+        public BookService(List<Book> books, BookCopySservice bookCopyService)
         {
             _books = books;
-            _availableBookService = availableBookService;
+            _bookCopyService = bookCopyService;
         }
 
         public void AddBook(BookCreateDto dto)
@@ -29,9 +29,6 @@ namespace LibrarySystem.Service
             book.Version = dto.Version;
             book.AuthorId = dto.AuthorId;
             book.CategoryId = dto.CategoryId;
-            book.PublisherId = dto.PublisherId;
-            book.TotalCopies = dto.TotalCopies;
-
             book.CreatedBy = 1;
             book.CreatedDate = DateTime.Now;
 
@@ -66,7 +63,6 @@ namespace LibrarySystem.Service
             dto.Version = book.Version;
             dto.AuthorId = book.AuthorId;
             dto.CategoryId = book.CategoryId;
-            dto.PublisherId = book.PublisherId;
             dto.TotalCopies = book.TotalCopies;
 
             return dto;
@@ -83,9 +79,6 @@ namespace LibrarySystem.Service
                 book.Version = dto.Version;
                 book.AuthorId = dto.AuthorId;
                 book.CategoryId = dto.CategoryId;
-                book.PublisherId = dto.PublisherId;
-                book.TotalCopies = dto.TotalCopies;
-
                 book.LastModifiedBy = 1;
                 book.LastModifiedDate = DateTime.Now;
             }
@@ -103,59 +96,86 @@ namespace LibrarySystem.Service
 
         public int GetTotalCopies(int bookId)
         {
-            return _availableBookService.GetAllCopiesForBook(bookId).Count;
+            return _bookCopyService.GetAllCopiesForBook(bookId).Count;
         }
 
         public int GetAvailableCopies(int bookId)
         {
-            return _availableBookService.GetAvailableCount(bookId);
+            return _bookCopyService.GetAvailableCount(bookId);
         }
 
         public int GetBorrowedCopies(int bookId)
         {
-            return _availableBookService.GetBorrowedCount(bookId);
+            return _bookCopyService.GetBorrowedCount(bookId);
         }
 
         public List<BookListDto> SearchBooks(BookSearchDto dto)
         {
-            var filtered = _books;
+            
+            var query = _books.AsQueryable();
 
-            if (!string.IsNullOrEmpty(dto.Title))
-                filtered = filtered.Where(b => b.Title.ToLower().Contains(dto.Title.ToLower())).ToList();
-
-            if (dto.PublishDate.HasValue)
-                filtered = filtered.Where(b => b.PublishDate == dto.PublishDate.Value).ToList();
-
-            if (!string.IsNullOrEmpty(dto.Version))
-                filtered = filtered.Where(b => b.Version.ToLower() == dto.Version.ToLower()).ToList();
-
-            if (dto.AuthorId.HasValue)
-                filtered = filtered.Where(b => b.AuthorId == dto.AuthorId.Value).ToList();
-
-            if (dto.CategoryId.HasValue)
-                filtered = filtered.Where(b => b.CategoryId == dto.CategoryId.Value).ToList();
-
-            if (dto.PublisherId.HasValue)
-                filtered = filtered.Where(b => b.PublisherId == dto.PublisherId.Value).ToList();
-
-            if (dto.Available.HasValue)
+           
+            if (!string.IsNullOrWhiteSpace(dto.Title))
             {
-                if (dto.Available.Value == true)
-                    filtered = filtered.Where(b => _availableBookService.GetAvailableCount(b.Id) > 0).ToList();
-                else
-                    filtered = filtered.Where(b => _availableBookService.GetAvailableCount(b.Id) == 0).ToList();
+                var title = dto.Title.ToLower();
+                query = query.Where(b => b.Title.ToLower().Contains(title));
             }
 
-            
-            int skip = (dto.Page - 1) * dto.PageSize;
-            filtered = filtered.Skip(skip).Take(dto.PageSize).ToList();
-
-            return filtered.Select(b => new BookListDto
+            if (dto.PublishDate.HasValue)
             {
-                Id = b.Id,
-                Title = b.Title
-            }).ToList();
-        }
+                var date = dto.PublishDate.Value.Date;
+                query = query.Where(b => b.PublishDate.Date == date);
+            }
 
+            if (!string.IsNullOrWhiteSpace(dto.Version))
+            {
+                var version = dto.Version.ToLower();
+                query = query.Where(b => b.Version.ToLower() == version);
+            }
+
+            if (dto.AuthorId.HasValue)
+            {
+                int authorId = dto.AuthorId.Value;
+                query = query.Where(b => b.AuthorId == authorId);
+            }
+
+            if (dto.CategoryId.HasValue)
+            {
+                int categoryId = dto.CategoryId.Value;
+                query = query.Where(b => b.CategoryId == categoryId);
+            }
+          
+            if (dto.Available.HasValue)
+            {
+                bool mustBeAvailable = dto.Available.Value;
+
+                query = query.Where(b =>
+                    mustBeAvailable
+                        ? _bookCopyService.GetAvailableCount(b.Id) > 0
+                        : _bookCopyService.GetAvailableCount(b.Id) == 0
+                );
+            }
+
+          
+            int page = dto.Page <= 0 ? 1 : dto.Page;
+            int pageSize = dto.PageSize <= 0 ? 10 : dto.PageSize;
+
+            int skip = (page - 1) * pageSize;
+
+            query = query
+                .Skip(skip)
+                .Take(pageSize);
+
+           
+            return query
+                .Select(b => new BookListDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    
+                })
+                .ToList();
+        }
     }
+
 }

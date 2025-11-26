@@ -36,9 +36,7 @@ namespace LibrarySystem.Service
                   Id = p.Id,
                   Name = p.Name
              }).ToList();
-
         }    
-
         public PublisherDetailsDto GetPublisherById(int id)
         {
             Publisher p = _publishers.FirstOrDefault(z => z.Id == id);
@@ -52,7 +50,6 @@ namespace LibrarySystem.Service
 
             return dto;
         }
-
         public void EditPublisher(int id, PublisherUpdateDto dto)
         {
             Publisher existing = _publishers.FirstOrDefault(p => p.Id == id);
@@ -64,11 +61,9 @@ namespace LibrarySystem.Service
                 existing.LastModifiedDate = DateTime.Now;
             }
         }
-
         public void DeletePublisher(int id)
         {
             Publisher existing = _publishers.FirstOrDefault(p => p.Id == id);
-
             if (existing != null)
             {
                 _publishers.Remove(existing);

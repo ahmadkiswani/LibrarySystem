@@ -10,11 +10,9 @@ namespace LibrarySystem.DTOs.BorrowDTOs
         [Required]  
         public int UserId { get; set; }
         [Required]
-        public int AvailableBookId { get; set; }
-        [Required]
-        public DateTime BorrowDate { get; set; }
-
-        public DateTime DueDate { get; set; }
+        public int BookCopyId { get; set; }
+        
+      
 
 
     }

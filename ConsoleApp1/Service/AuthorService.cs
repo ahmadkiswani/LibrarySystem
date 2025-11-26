@@ -1,18 +1,23 @@
 ﻿using LibrarySystem.DTOs;
 using LibrarySystem.DTOs.AuthorDtos;
+using LibrarySystem.DTOs.BookDtos;
 using LibrarySystem.Models;
+using static System.Reflection.Metadata.BlobBuilder;
 
 public class AuthorService
 {
     private List<Author> _authors;
+    private readonly List<Book> _books;
+
     private int _idCounter = 1;
 
-    public AuthorService(List<Author> authors)
+    public AuthorService(List<Author> authors, List<Book> books )
     {
         _authors = authors;
+        _books = books;
     }
 
-   
+
     public void AddAuthor(AuthorCreateDto dto)
     {
         var author = new Author();
@@ -69,5 +74,17 @@ public class AuthorService
         {
             _authors.Remove(author);
         }
+    }
+    public List<BookListDto> GetBooksByAuthor(int authorId)
+    {
+        return _books
+            .Where(b => b.AuthorId == authorId)
+            .Select(b => new BookListDto
+            {
+                Id = b.Id,
+                Title = b.Title,
+                AvailableCopies = b.TotalCopies
+            })
+            .ToList();
     }
 }

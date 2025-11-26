@@ -4,6 +4,10 @@ namespace LibrarySystem.DTOs.BorrowDTOs
 {
     public class BorrowReturnDto
     {
-        public DateTime ReturnDate { get; set; }
+
+
+         public int Id { get; set; } 
+        
+
     }
 }

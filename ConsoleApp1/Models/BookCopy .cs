@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace LibrarySystem.Models
 {
-    public class AvailableBook : AuditLog
+    public class BookCopy : AuditLog
     {
         public int Id { get; set; }
 
@@ -16,4 +16,5 @@ namespace LibrarySystem.Models
 
         public List<Borrow> BorrowRecords { get; set; } = new();
     }
+
 }
