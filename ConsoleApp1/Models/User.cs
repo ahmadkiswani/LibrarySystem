@@ -19,11 +19,6 @@ namespace LibrarySystem.Models
         public string UserEmail { get; set; }        
 
         [Required]
-        [MaxLength(200)]
-        public string PasswordHash { get; set; }    
-
-        [Required]
-    
         public ICollection<Borrow> Borrows { get; set; } 
     }
 

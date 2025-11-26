@@ -85,8 +85,6 @@ namespace LibrarySystem.Service
                     b.IsOverdue = false;
                     b.OverdueDays = 0;
                 });
-
-
         }
 
     }

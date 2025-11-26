@@ -24,7 +24,6 @@ namespace LibrarySystem.Service
             u.Id = _idCounter++;
             u.UserName = dto.UserName;
             u.UserEmail = dto.UserEmail;
-            u.PasswordHash = dto.Password;  
             u.CreatedBy = 1;
             u.CreatedDate = DateTime.Now;
             _users.Add(u);

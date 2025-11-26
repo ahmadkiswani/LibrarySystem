@@ -16,8 +16,6 @@ namespace LibrarySystem.DTOs.UserDtos
         [StringLength(120)]
         public string UserEmail { get; set; } = string.Empty;   
 
-        [Required]
-        [StringLength(30, MinimumLength = 6)]
-        public string Password { get; set; } = string.Empty;    
+        
     }
 }
