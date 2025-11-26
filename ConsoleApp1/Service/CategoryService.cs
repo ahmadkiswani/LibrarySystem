@@ -10,6 +10,7 @@ namespace LibrarySystem.Service
     public class CategoryService
     {
         private readonly List<Category> _category;
+        private int _idCounter = 1;
 
         public CategoryService(List<Category> category)
         {
@@ -19,7 +20,7 @@ namespace LibrarySystem.Service
         public void AddCategory(CategoryCreateDto dto)
         {
             Category category = new Category();
-
+            category.Id = _category.Count + 1;
             category.Name = dto.Name;
             category.CreatedBy = 1;
             category.CreatedDate = DateTime.Now;

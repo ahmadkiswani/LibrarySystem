@@ -15,6 +15,8 @@ namespace LibrarySystem.DTOs.BorrowDTOs
         public DateTime BorrowDate { get; set; }
 
         public DateTime DueDate { get; set; }
+
+
     }
 
 

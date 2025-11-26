@@ -10,5 +10,6 @@ namespace LibrarySystem.DTOs
         [Required(ErrorMessage = "Author name is required")]
         [StringLength(60, MinimumLength = 3)]
         public string AuthorName { get; set; }
+        public int Id { get; set; }
     }
 }

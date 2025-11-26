@@ -7,21 +7,11 @@ namespace LibrarySystem.Models
 {
     public class Book : AuditLog
     {
-        [Key]
-        public int Id { get; set; }  
-
-        [Required]
-        public string Title { get; set; } = string.Empty;
-
+        public int Id { get; set; }
+        public string Title { get; set; }
         public DateTime PublishDate { get; set; }
+        public string Version { get; set; }
 
-        [MaxLength(50)]
-        public string Version { get; set; } = string.Empty;
-
-        [Required]
-        public int AvailableCopies { get; set; }
-
-        [Required]
         public int TotalCopies { get; set; }
 
         public int AuthorId { get; set; }
@@ -32,8 +22,9 @@ namespace LibrarySystem.Models
 
         public int PublisherId { get; set; }
         public Publisher Publisher { get; set; }
-        public ICollection<AvailableBook> Copies { get; set; } = new List<AvailableBook>();
 
+        public ICollection<AvailableBook> Copies { get; set; } = new List<AvailableBook>();
     }
+
 }
 

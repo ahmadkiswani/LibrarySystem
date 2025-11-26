@@ -9,6 +9,7 @@ namespace LibrarySystem.Service
     public class PublisherService
     {
         private List<Publisher> _publishers;
+        private int _idCounter = 1;
 
         public PublisherService(List<Publisher> publishers)
         {
@@ -18,6 +19,7 @@ namespace LibrarySystem.Service
         public void AddPublisher(PublisherCreateDto dto)
         {
             Publisher p = new Publisher();
+            p.Id = _idCounter++;
             p.Name = dto.Name;
             p.CreatedBy = 1;
             p.CreatedDate = DateTime.Now;

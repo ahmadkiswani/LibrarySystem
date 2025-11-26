@@ -11,6 +11,7 @@ namespace LibrarySystem.Service
     public class UserService
     {
         private List<User> _users;
+        private int _idCounter = 1;
 
         public UserService(List<User> users)
         {
@@ -20,6 +21,7 @@ namespace LibrarySystem.Service
         public void AddUser(UserCreateDto dto)
         {
             User u = new User();
+            u.Id = _idCounter++;
             u.UserName = dto.UserName;
             u.UserEmail = dto.UserEmail;
             u.PasswordHash = dto.Password;  

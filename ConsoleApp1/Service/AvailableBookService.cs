@@ -10,6 +10,7 @@ namespace LibrarySystem.Service
     public class AvailableBookService
     {
         private List<AvailableBook> _inventory;
+        private int _idCounter = 1;
 
         public AvailableBookService(List<AvailableBook> inventory)
         {
@@ -19,6 +20,7 @@ namespace LibrarySystem.Service
         public void AddAvailableBook(AvailableBookCreateDto dto)
         {
             AvailableBook a = new AvailableBook();
+            a.Id = _idCounter++;
             a.BookId = dto.BookId;
             a.CreatedBy = 1;
             a.CreatedDate = DateTime.Now;

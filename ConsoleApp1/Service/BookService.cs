@@ -11,6 +11,8 @@ namespace LibrarySystem.Service
     {
         private readonly List<Book> _books;
         private readonly AvailableBookService _availableBookService;
+        private int _idCounter = 1;
+
 
         public BookService(List<Book> books, AvailableBookService availableBookService)
         {
@@ -21,7 +23,7 @@ namespace LibrarySystem.Service
         public void AddBook(BookCreateDto dto)
         {
             Book book = new Book();
-
+            book.Id = _idCounter++;
             book.Title = dto.Title;
             book.PublishDate = dto.PublishDate;
             book.Version = dto.Version;

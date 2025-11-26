@@ -5,6 +5,7 @@ using LibrarySystem.Models;
 public class AuthorService
 {
     private List<Author> _authors;
+    private int _idCounter = 1;
 
     public AuthorService(List<Author> authors)
     {
@@ -15,11 +16,10 @@ public class AuthorService
     public void AddAuthor(AuthorCreateDto dto)
     {
         var author = new Author();
-
+        author.Id = _idCounter++;
         author.AuthorName = dto.AuthorName;
-        author.CreatedBy = 1;
+        author.CreatedBy=1;
         author.CreatedDate = DateTime.Now;
-
         _authors.Add(author);
     }
 
@@ -33,7 +33,6 @@ public class AuthorService
             AuthorListDto dto = new AuthorListDto();
             dto.Id = a.Id;
             dto.AuthorName = a.AuthorName;
-
             list.Add(dto);
         }
         return list;
@@ -63,7 +62,7 @@ public class AuthorService
         if (author != null)
         {
             author.AuthorName = dto.AuthorName;
-            author.LastModifiedBy = 1;
+            author.LastModifiedBy =dto.Id;
             author.LastModifiedDate = DateTime.Now;
         }
     }
