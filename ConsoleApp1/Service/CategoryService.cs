@@ -75,16 +75,12 @@ namespace LibrarySystem.Service
         {
             List<CategoryListDto> result = new List<CategoryListDto>();
 
-            foreach (var category in _category)
-            {
-                CategoryListDto dto = new CategoryListDto();
-                dto.Id = category.Id;
-                dto.Name = category.Name;
-
-                result.Add(dto);
-            }
-
-            return result;
+            return _category
+           .Select(category => new CategoryListDto
+           {
+               Id = category.Id,
+               Name = category.Name
+           }).ToList();
         }
         public CategoryDetailsDto GetCategoryById(int id)
         {

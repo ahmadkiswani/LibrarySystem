@@ -27,15 +27,12 @@ public class AuthorService
     public List<AuthorListDto> GetAllAuthors()
     {
         List<AuthorListDto> list = new List<AuthorListDto>();
-
-        foreach (var a in _authors)
-        {
-            AuthorListDto dto = new AuthorListDto();
-            dto.Id = a.Id;
-            dto.AuthorName = a.AuthorName;
-            list.Add(dto);
-        }
-        return list;
+        return _authors
+               .Select(a => new AuthorListDto
+               {
+                   Id = a.Id,
+                   AuthorName = a.AuthorName
+               }).ToList();
     }
 
  
@@ -53,8 +50,6 @@ public class AuthorService
 
         return dto;
     }
-
-
     public void EditAuthor(int id, AuthorUpdateDto dto)
     {
         var author = _authors.FirstOrDefault(x => x.Id == id);
@@ -66,7 +61,6 @@ public class AuthorService
             author.LastModifiedDate = DateTime.Now;
         }
     }
-
     public void DeleteAuthor(int id)
     {
         var author = _authors.FirstOrDefault(x => x.Id == id);

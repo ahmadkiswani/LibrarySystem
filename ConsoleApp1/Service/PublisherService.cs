@@ -28,19 +28,16 @@ namespace LibrarySystem.Service
 
         public List<PublisherListDto> ListPublishers()
         {
-            List<PublisherListDto> result = new List<PublisherListDto>();
+            List<PublisherListDto> result = new List<PublisherListDto>(); 
 
-            foreach (var p in _publishers)
-            {
-                PublisherListDto dto = new PublisherListDto();
-                dto.Id = p.Id;
-                dto.Name = p.Name;
+            return _publishers
+             .Select(p => new PublisherListDto
+             {
+                  Id = p.Id,
+                  Name = p.Name
+             }).ToList();
 
-                result.Add(dto);
-            }
-
-            return result;
-        }
+        }    
 
         public PublisherDetailsDto GetPublisherById(int id)
         {

@@ -31,20 +31,16 @@ namespace LibrarySystem.Service
         {
             List<AvailableBookListDto> result = new List<AvailableBookListDto>();
 
-            foreach (var a in _inventory)
-            {
-                AvailableBookListDto dto = new AvailableBookListDto();
-                dto.Id = a.Id;
-                dto.BookId = a.BookId;
-                dto.IsAvailable = a.IsAvailable;
-
-                result.Add(dto);
-            }
-
-            return result;
+            return _inventory
+             .Select(a => new AvailableBookListDto
+             {
+                    Id = a.Id,
+                    BookId = a.BookId,
+                    IsAvailable = a.IsAvailable
+                }).ToList();
         }
             
-
+            
             public int GetAvailableCount(int bookId)
             {
                 return _inventory.Count(x => x.BookId == bookId && x.IsAvailable);

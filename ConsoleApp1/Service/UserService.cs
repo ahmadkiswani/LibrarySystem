@@ -32,14 +32,13 @@ namespace LibrarySystem.Service
         public List<UserListDto> ListUsers()
         {
             List<UserListDto> result = new List<UserListDto>();
+              return _users
+             .Select(u => new UserListDto
+             {
+                Id = u.Id,
+                UserName = u.UserName
+                }).ToList();
 
-            foreach (var u in _users)
-            {
-                UserListDto dto = new UserListDto();
-                dto.Id = u.Id;
-                dto.UserName = u.UserName;
-                result.Add(dto);
-            }
 
             return result;
         }

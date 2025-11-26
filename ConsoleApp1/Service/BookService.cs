@@ -42,16 +42,13 @@ namespace LibrarySystem.Service
         {
             List<BookListDto> list = new List<BookListDto>();
 
-            foreach (var book in _books)
-            {
-                BookListDto dto = new BookListDto();
-                dto.Id = book.Id;
-                dto.Title = book.Title;
+                    return _books
+             .Select(book => new BookListDto
+             {
+                 Id = book.Id,
+                 Title = book.Title
+             }).ToList();
 
-                list.Add(dto);
-            }
-
-            return list;
         }
 
         public BookDetailsDto GetBookById(int id)
