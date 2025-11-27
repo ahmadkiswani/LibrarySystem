@@ -86,8 +86,7 @@ namespace LibrarySystem.Service
             u.IsDeleted = true;
             u.DeletedBy = id;
             u.DeletedDate = DateTime.Now;   
-            u.LastModifiedBy = id;
-            u.LastModifiedDate = DateTime.Now;
+        
             Console.WriteLine($"User {id} soft deleted");
 
 
