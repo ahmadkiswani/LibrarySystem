@@ -17,11 +17,6 @@ namespace LibrarySystem.DTOs.BookDtos
         [Required]
         [StringLength(20)]
         public string Version { get; set; }
-
-        [Required]
-        [Range(1, 2000)]
-        public int TotalCopies { get; set; }
-
         [Required]
         public int AuthorId { get; set; }
 

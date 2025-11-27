@@ -15,6 +15,10 @@ namespace LibrarySystem.DTOs.BookDtos
         public int PublisherId { get; set; }
         public int TotalCopies { get; set; }
         public int AvailableCopies { get; set; }
+        public string AuthorName { get; set; }
+        public string CategoryName { get; set; }
+        public string PublisherName { get; set; }
+
     }
 
 }

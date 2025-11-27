@@ -5,9 +5,8 @@ using System.Text;
 
 namespace LibrarySystem.DTOs.AvailableBookDto
 {
-    public class AvailableBookCreateDto
+    public class BookCopyCreateDto
     {
-        [Required]
         public int BookId { get; set; }
 
     }

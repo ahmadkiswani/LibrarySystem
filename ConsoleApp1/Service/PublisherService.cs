@@ -1,8 +1,9 @@
-﻿using LibrarySystem.Models;
-using LibrarySystem.DTOs;
+﻿using LibrarySystem.DTOs;
+using LibrarySystem.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace LibrarySystem.Service
 {
@@ -31,6 +32,7 @@ namespace LibrarySystem.Service
             List<PublisherListDto> result = new List<PublisherListDto>(); 
 
             return _publishers
+                .Where(p => !p.IsDeleted)
              .Select(p => new PublisherListDto
              {
                   Id = p.Id,
@@ -46,8 +48,7 @@ namespace LibrarySystem.Service
 
             PublisherDetailsDto dto = new PublisherDetailsDto();
             dto.Id = p.Id;
-            dto.Name = p.Name;
-
+            dto.Name = p.IsDeleted ? "Unknown" : p.Name;
             return dto;
         }
         public void EditPublisher(int id, PublisherUpdateDto dto)
@@ -65,9 +66,12 @@ namespace LibrarySystem.Service
         {
             Publisher existing = _publishers.FirstOrDefault(p => p.Id == id);
             if (existing != null)
-            {
-                _publishers.Remove(existing);
-            }
+                if (existing == null)
+                    throw new Exception("Publisher not found");
+            existing.IsDeleted = true;
+            existing.DeletedBy = id;
+            existing.DeletedDate=DateTime.Now;
+
         }
     }
 }

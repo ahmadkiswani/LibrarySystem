@@ -75,10 +75,22 @@ namespace LibrarySystem.Service
         {
             var u = _users.FirstOrDefault(x => x.Id == id);
 
-            if (u != null)
-            {
-                _users.Remove(u);
-            }
+            if (u == null)
+                throw new Exception("❗ User not found");
+
+            bool hasActiveBorrow = u.Borrows != null && u.Borrows.Any(b => b.ReturnDate == null);
+
+            if (hasActiveBorrow)
+                throw new Exception("❗ User cannot be deleted — user still has borrowed books");
+
+            u.IsDeleted = true;
+            u.DeletedBy = id;
+            u.DeletedDate = DateTime.Now;   
+            u.LastModifiedBy = id;
+            u.LastModifiedDate = DateTime.Now;
+            Console.WriteLine($"User {id} soft deleted");
+
+
         }
     }
 }

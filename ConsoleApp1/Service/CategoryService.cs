@@ -24,20 +24,20 @@ namespace LibrarySystem.Service
             category.Name = dto.Name;
             category.CreatedBy = 1;
             category.CreatedDate = DateTime.Now;
-
             _category.Add(category);
         }
-
-        public void RemoveCategory(int id)
+        public void DeleteCategory(int id)
         {
-            Category existingcategory = _category.FirstOrDefault(c => c.Id == id);
+            var existingcategory = _category.FirstOrDefault(c => c.Id == id);
 
-            if (existingcategory != null)
-            {
-                _category.Remove(existingcategory);
-            }
+            if (existingcategory == null)
+                throw new Exception("❗ Category not found");
+
+            existingcategory.IsDeleted = true;
+            existingcategory.DeletedBy = id;
+            existingcategory.DeletedDate = DateTime.Now;
+            
         }
-
         public void EditCategory(int id, CategoryUpdateDto dto)
         {
             Category existingcategory = _category.FirstOrDefault(p => p.Id == id);
@@ -49,7 +49,6 @@ namespace LibrarySystem.Service
                 existingcategory.LastModifiedBy = 1;
             }
         }
-
         public List<BookListDto> GetBooksByCategoryId(int categoryId)
         {
             List<BookListDto> result = new List<BookListDto>();
@@ -76,11 +75,13 @@ namespace LibrarySystem.Service
             List<CategoryListDto> result = new List<CategoryListDto>();
 
             return _category
-           .Select(category => new CategoryListDto
-           {
-               Id = category.Id,
-               Name = category.Name
-           }).ToList();
+                .Where(c => !c.IsDeleted)
+                .Select(category => new CategoryListDto
+                {
+                    Id = category.Id,
+                    Name = category.Name
+                })
+                .ToList();
         }
         public CategoryDetailsDto GetCategoryById(int id)
         {
@@ -88,10 +89,9 @@ namespace LibrarySystem.Service
 
             if (category == null)
                 return null;
-
             CategoryDetailsDto dto = new CategoryDetailsDto();
             dto.Id = category.Id;
-            dto.Name = category.Name;
+            dto.Name = category.IsDeleted ? "Unknown" : category.Name;
             dto.BooksCount = category.Books.Count;
 
             return dto;

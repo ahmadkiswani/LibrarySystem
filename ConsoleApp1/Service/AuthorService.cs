@@ -43,7 +43,7 @@ public class AuthorService
  
     public AuthorDetailsDto GetAuthorById(int id)
     {
-        var author = _authors.FirstOrDefault(x => x.Id == id);
+        var author = _authors.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
 
         if (author == null)
             return null;
@@ -51,13 +51,13 @@ public class AuthorService
         AuthorDetailsDto dto = new AuthorDetailsDto();
         dto.Id = author.Id;
         dto.AuthorName = author.AuthorName;
-        dto.BooksCount = author.Books.Count;
+        dto.BooksCount = author.Books.Count(b => !b.IsDeleted);
 
         return dto;
     }
     public void EditAuthor(int id, AuthorUpdateDto dto)
     {
-        var author = _authors.FirstOrDefault(x => x.Id == id);
+        var author = _authors.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
 
         if (author != null)
         {
@@ -71,9 +71,10 @@ public class AuthorService
         var author = _authors.FirstOrDefault(x => x.Id == id);
 
         if (author != null)
-        {
-            _authors.Remove(author);
-        }
+            throw new Exception("Author not found");
+        author.IsDeleted = true;
+        author.DeletedBy = 0;
+        author.DeletedDate = DateTime.Now;
     }
     public List<BookListDto> GetBooksByAuthor(int authorId)
     {

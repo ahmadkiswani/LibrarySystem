@@ -1,4 +1,5 @@
 ﻿using LibrarySystem.DTOs;
+using LibrarySystem.DTOs.AvailableBookDto;
 using LibrarySystem.DTOs.BookDtos;
 using LibrarySystem.Models;
 using System;
@@ -10,16 +11,13 @@ namespace LibrarySystem.Service
     public class BookService
     {
         private readonly List<Book> _books;
-        private readonly BookCopySservice _bookCopyService;
+        private readonly BookCopyService _bookCopyService;
         private int _idCounter = 1;
-
-
-        public BookService(List<Book> books, BookCopySservice bookCopyService)
+        public BookService(List<Book> books, BookCopyService bookCopyService)
         {
             _books = books;
             _bookCopyService = bookCopyService;
         }
-
         public void AddBook(BookCreateDto dto)
         {
             Book book = new Book();
@@ -31,32 +29,25 @@ namespace LibrarySystem.Service
             book.CategoryId = dto.CategoryId;
             book.CreatedBy = 1;
             book.CreatedDate = DateTime.Now;
-
             _books.Add(book);
         }
-
         public List<BookListDto> GetAllBooks()
         {
             List<BookListDto> list = new List<BookListDto>();
-
-                    return _books
-             .Select(book => new BookListDto
-             {
+            return _books
+                .Where(b => !b.IsDeleted)
+                .Select(book => new BookListDto
+                {
                  Id = book.Id,
                  Title = book.Title
-             }).ToList();
+                })
+                 .ToList();
 
         }
-
         public BookDetailsDto GetBookById(int id)
         {
-            Book book = _books.FirstOrDefault(b => b.Id == id);
-
-            if (book == null)
-                return null;
-
+            Book book = _books.FirstOrDefault(b => b.Id == id && !b.IsDeleted);
             BookDetailsDto dto = new BookDetailsDto();
-
             dto.Id = book.Id;
             dto.Title = book.Title;
             dto.PublishDate = book.PublishDate;
@@ -64,6 +55,18 @@ namespace LibrarySystem.Service
             dto.AuthorId = book.AuthorId;
             dto.CategoryId = book.CategoryId;
             dto.TotalCopies = book.TotalCopies;
+            dto.AuthorName = book.Author != null && !book.Author.IsDeleted
+                ? book.Author.AuthorName
+                : "Unknown";
+
+            dto.CategoryName = book.Category != null && !book.Category.IsDeleted
+                ? book.Category.Name
+                : "Unknown";
+
+            dto.PublisherName = book.Publisher != null && !book.Publisher.IsDeleted
+                ? book.Publisher.Name
+                : "Unknown";
+
 
             return dto;
         }
@@ -86,20 +89,40 @@ namespace LibrarySystem.Service
 
         public void DeleteBook(int id)
         {
-            Book book = _books.FirstOrDefault(b => b.Id == id);
+            var book = _books.FirstOrDefault(b => b.Id == id);
 
-            if (book != null)
+            if (book == null)
+                throw new Exception("❗ Book not found");
+
+            bool hasActiveBorrow = book.Copies.Any(copy => copy.BorrowRecords.Any(bc => bc.ReturnDate == null));
+            if (hasActiveBorrow)
+                throw new Exception("❗ Cannot delete book — copies are currently borrowed");
+
+            book.IsDeleted = true;
+            book.DeletedDate = DateTime.Now;
+            book.DeletedBy = id;
+            Console.WriteLine($"book {id} soft deleted");
+
+            bool allCopiesDeleted = book.Copies.All(c => c.IsDeleted);
+            hasActiveBorrow = book.Copies.Any(c => c.BorrowRecords.Any(b => b.ReturnDate == null));
+
+            if (allCopiesDeleted && !hasActiveBorrow)
             {
-                _books.Remove(book);
+                book.IsDeleted = true;
+                book.LastModifiedBy = 1;
+                book.LastModifiedDate = DateTime.Now;
+                Console.WriteLine($"Book {book.Id} auto-soft-deleted because all copies are deleted");
             }
         }
+
+
 
         public int GetTotalCopies(int bookId)
         {
             return _bookCopyService.GetAllCopiesForBook(bookId).Count;
         }
 
-        public int GetAvailableCopies(int bookId)
+        public int BookCopyService(int bookId)
         {
             return _bookCopyService.GetAvailableCount(bookId);
         }
@@ -111,10 +134,12 @@ namespace LibrarySystem.Service
 
         public List<BookListDto> SearchBooks(BookSearchDto dto)
         {
-            
-            var query = _books.AsQueryable();
 
-           
+            var query = _books
+                .Where(b => !b.IsDeleted)
+                .AsQueryable();
+
+
             if (!string.IsNullOrWhiteSpace(dto.Title))
             {
                 var title = dto.Title.ToLower();
