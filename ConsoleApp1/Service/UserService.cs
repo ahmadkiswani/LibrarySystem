@@ -10,13 +10,15 @@ namespace LibrarySystem.Service
 {
     public class UserService
     {
-        private List<User> _users;
+        private readonly LibraryContext _context;
         private int _idCounter = 1;
+        private List<User> _users => _context.Users;
 
-        public UserService(List<User> users)
+        public UserService(LibraryContext context)
         {
-            _users = users;
+            _context = context;
         }
+
 
         public void AddUser(UserCreateDto dto)
         {

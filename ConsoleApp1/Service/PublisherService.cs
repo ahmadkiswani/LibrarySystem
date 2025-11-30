@@ -10,12 +10,14 @@ namespace LibrarySystem.Service
 {
     public class PublisherService
     {
-        private List<Publisher> _publishers;
+        private readonly LibraryContext _context;
+        private List<Publisher> _publishers => _context.Publishers;
         private int _idCounter = 1;
 
-        public PublisherService(List<Publisher> publishers)
+
+        public PublisherService(LibraryContext context)
         {
-            _publishers = publishers;
+            _context = context;
         }
 
         public void AddPublisher(PublisherCreateDto dto)

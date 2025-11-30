@@ -8,16 +8,15 @@ namespace LibrarySystem.Service
 {
     public class BorrowService
     {
-        private List<Borrow> _borrow;
-        private List<BookCopy> _inventory;
-        private List<User>_user;
+        private readonly LibraryContext _context;
+        private List<Borrow> _borrow => _context.Borrows;
+        private List<BookCopy> _inventory => _context.BookCopies;
+        private List<User> _user => _context.Users;
         private int _idCounter = 1;
 
-        public BorrowService(List<Borrow> borrow, List<BookCopy> inventory,List<User>user)
+        public BorrowService(LibraryContext context)
         {
-            _borrow = borrow;
-            _inventory = inventory;
-            _user = user;
+            _context = context;
         }
         public void BorrowBook(BorrowCreateDto dto)
         {

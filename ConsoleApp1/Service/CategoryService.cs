@@ -10,14 +10,13 @@ namespace LibrarySystem.Service
 {
     public class CategoryService
     {
-        private readonly List<Category> _category;
-        private int _idCounter = 1;
+        private readonly LibraryContext _context;
+        private List<Category> _category => _context.Categories;
 
-        public CategoryService(List<Category> category)
+        public CategoryService(LibraryContext context)
         {
-            _category = category;
+            _context = context;
         }
-
         public void AddCategory(CategoryCreateDto dto)
         {
             Category category = new Category();
