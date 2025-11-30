@@ -1,12 +1,93 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using LibrarySystem.Service;
+using LibrarySystem.DTOs.BookDtos;
 
 namespace LibrarySystemAPIs.Controllers
 {
-    public class BookController : Controller
+    [ApiController]
+    [Route("api/Book")]
+    public class BookController : ControllerBase
     {
-        public IActionResult Index()
+        private readonly BookService _service;
+
+        public BookController(BookService service)
         {
-            return View();
+            _service = service;
+        }
+
+        [HttpPost]
+        public IActionResult Add([FromBody] BookCreateDto dto)
+        {
+            if (dto == null)
+                return BadRequest("Request body is empty");
+
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                return BadRequest("Title is required");
+
+            if (dto.AuthorId <= 0)
+                return BadRequest("Invalid AuthorId");
+
+            if (dto.CategoryId <= 0)
+                return BadRequest("Invalid CategoryId");
+
+            if (dto.PublisherId <= 0)
+                return BadRequest("Invalid PublisherId");
+
+            _service.AddBook(dto);
+            return Ok("Book added successfully");
+        }
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            return Ok(_service.GetAllBooks());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var book = _service.GetBookById(id);
+
+            if (book == null)
+                return NotFound("Book not found");
+
+            return Ok(book);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Edit(int id, [FromBody] BookUpdateDto dto)
+        {
+            if (id <= 0)
+                return BadRequest("Invalid ID");
+
+            _service.EditBook(id, dto);
+            return Ok("Book updated successfully");
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                _service.DeleteBook(id);
+                return Ok("Book deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("search")]
+        public IActionResult Search([FromQuery] BookSearchDto dto)
+        {
+            if (dto.Page <= 0)
+                return BadRequest("Page must be >= 1");
+
+            if (dto.PageSize <= 0 || dto.PageSize > 200)
+                return BadRequest("PageSize must be between 1–200");
+
+            return Ok(_service.Search(dto));
         }
     }
 }

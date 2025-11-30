@@ -1,6 +1,7 @@
 ﻿using LibrarySystem.DTOs;
 using LibrarySystem.DTOs.AvailableBookDto;
 using LibrarySystem.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,15 @@ namespace LibrarySystem.Service
 {
     public class BookCopyService
     {
-        private List<BookCopy> _inventory;
-        private List<Book> _books;
-
+        private readonly LibraryContext _context;
+        private List<BookCopy> _inventory => _context.BookCopies;
+        private List<Book> _books => _context.Books;
         private int _idCounter = 1;
 
-        public BookCopyService(List<BookCopy> inventory, List<Book> books)
+        public BookCopyService(LibraryContext context)
         {
-            _inventory = inventory;
-            _books = books;
+            _context = context;
+
         }
         public void AddBookCopy(BookCopyCreateDto dto)
         {
@@ -38,7 +39,6 @@ namespace LibrarySystem.Service
         public void DeleteBookCopy(int id)
         {
             var copy = _inventory.FirstOrDefault(x => x.Id == id&&!x.IsDeleted);
-
             if (copy == null)
                 throw new Exception("Copy not found");
 

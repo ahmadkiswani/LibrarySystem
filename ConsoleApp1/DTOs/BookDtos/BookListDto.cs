@@ -9,6 +9,10 @@ namespace LibrarySystem.DTOs.BookDtos
         public int Id { get; set; }
         public string Title { get; set; }
         public int AvailableCopies { get; set; }
+        public string? AuthorName { get; set; }
+        public string? CategoryName { get; set; }
+        public string? PublisherName { get; set; }
+        
     }
 
 }

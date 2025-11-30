@@ -1,4 +1,5 @@
-﻿using LibrarySystem.DTOs;
+﻿using LibrarySystem;
+using LibrarySystem.DTOs;
 using LibrarySystem.DTOs.AuthorDtos;
 using LibrarySystem.DTOs.BookDtos;
 using LibrarySystem.Models;
@@ -6,15 +7,16 @@ using static System.Reflection.Metadata.BlobBuilder;
 
 public class AuthorService
 {
-    private List<Author> _authors;
-    private readonly List<Book> _books;
+
+    private readonly LibraryContext _context;
+    private List<Author> _authors => _context.Authors;
+    private List<Book> _books => _context.Books;
 
     private int _idCounter = 1;
 
-    public AuthorService(List<Author> authors, List<Book> books )
+    public AuthorService(LibraryContext context)
     {
-        _authors = authors;
-        _books = books;
+        _context = context;
     }
 
 
@@ -76,6 +78,25 @@ public class AuthorService
         author.DeletedBy = 0;
         author.DeletedDate = DateTime.Now;
     }
+    public List<AuthorListDto> Search(AuthorSearchDto dto)
+    {
+        return _authors
+            .Where(a => !a.IsDeleted)
+            .Where(a =>
+                (dto.Text == null || a.AuthorName.ToLower().Contains(dto.Text.ToLower())) &&
+                (dto.Number == null || a.Id == dto.Number)
+            )
+            .Skip((dto.Page - 1) * dto.PageSize)
+            .Take(dto.PageSize)
+            .Select(a => new AuthorListDto
+            {
+                Id = a.Id,
+                AuthorName = a.AuthorName
+            })
+            .ToList();
+    }
+
+
     public List<BookListDto> GetBooksByAuthor(int authorId)
     {
         return _books

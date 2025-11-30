@@ -1,12 +1,13 @@
 using LibrarySystem.Service;
-
-
+using LibrarySystem;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<LibraryContext>();
+builder.Services.AddScoped<AuthorService>();
+
 
 var app = builder.Build();
 

@@ -25,7 +25,7 @@ namespace LibrarySystem.Service
 
             if (copy == null || !copy.IsAvailable)
                 throw new Exception("This copy is not available");
-            if (!_user.Any(u => u.Id == dto.UserId))
+            if (!_user.Any(u => u.Id == dto.Id))
                 throw new Exception("User does not exist");
             copy.LastModifiedBy = 1;
             copy.IsAvailable = false;
@@ -33,7 +33,7 @@ namespace LibrarySystem.Service
 
             Borrow b = new Borrow();
             b.Id = _idCounter++;
-            b.UserId = dto.UserId;
+            b.UserId = dto.Id;
             b.BookCopyId = dto.BookCopyId;
             b.BorrowDate = DateTime.Now;
             b.DueDate = DateTime.Now.AddDays(5);  
@@ -41,7 +41,7 @@ namespace LibrarySystem.Service
             b.CreatedBy = 1;
             b.CreatedDate = DateTime.Now;
             _borrow.Add(b);
-            var user = _user.FirstOrDefault(u => u.Id == dto.UserId);
+            var user = _user.FirstOrDefault(u => u.Id == dto.Id);
 
             if (user != null)
             {
@@ -106,6 +106,25 @@ namespace LibrarySystem.Service
                     b.OverdueDays = 0;
                 });
         }
+        public List<Borrow> Search(BorrowSearchDto dto)
+        {
+            return _borrow
+                .Where(b =>
+                    (dto.Number == null || b.Id == dto.Number) &&
+                    (dto.UserId == null || b.UserId == dto.UserId) &&
+                    (dto.BookCopyId == null || b.BookCopyId == dto.BookCopyId) &&
+                    (dto.Returned == null ||
+                        (dto.Returned.Value
+                            ? b.ReturnDate != null
+                            : b.ReturnDate == null
+                        )
+                    )
+                )
+                .Skip((dto.Page - 1) * dto.PageSize)
+                .Take(dto.PageSize)
+                .ToList();
+        }
+
 
     }
 

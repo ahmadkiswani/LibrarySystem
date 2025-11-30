@@ -1,4 +1,5 @@
 ﻿using LibrarySystem.DTOs;
+using LibrarySystem.DTOs.PublisherDTOs;
 using LibrarySystem.Models;
 using System;
 using System.Collections.Generic;
@@ -73,5 +74,23 @@ namespace LibrarySystem.Service
             existing.DeletedDate=DateTime.Now;
 
         }
+        public List<PublisherListDto> Search(PublisherSearchDto dto)
+        {
+            return _publishers
+                .Where(p => !p.IsDeleted)
+                .Where(p =>
+                    (dto.Text == null || p.Name.ToLower().Contains(dto.Text.ToLower())) &&
+                    (dto.Number == null || p.Id == dto.Number)
+                )
+                .Skip((dto.Page - 1) * dto.PageSize)
+                .Take(dto.PageSize)
+                .Select(p => new PublisherListDto
+                {
+                    Id = p.Id,
+                    Name = p.Name
+                })
+                .ToList();
+        }
+
     }
 }

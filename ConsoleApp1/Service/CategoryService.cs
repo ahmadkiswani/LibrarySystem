@@ -1,5 +1,6 @@
 ﻿using LibrarySystem.DTOs;
 using LibrarySystem.DTOs.BookDtos;
+using LibrarySystem.DTOs.CategoryDtos;
 using LibrarySystem.Models;
 using System;
 using System.Collections.Generic;
@@ -49,26 +50,26 @@ namespace LibrarySystem.Service
                 existingcategory.LastModifiedBy = 1;
             }
         }
-        public List<BookListDto> GetBooksByCategoryId(int categoryId)
+
+
+        public List<CategoryListDto> Search(CategorySearchDto dto)
         {
-            List<BookListDto> result = new List<BookListDto>();
-
-            Category category = _category.FirstOrDefault(c => c.Id == categoryId);
-
-            if (category != null)
-            {
-                foreach (var b in category.Books)
+            return _category
+                .Where(c => !c.IsDeleted)
+                .Where(c =>
+                    (dto.Text == null || c.Name.ToLower().Contains(dto.Text.ToLower())) &&
+                    (dto.Number == null || c.Id == dto.Number)
+                )
+                .Skip((dto.Page - 1) * dto.PageSize)
+                .Take(dto.PageSize)
+                .Select(c => new CategoryListDto
                 {
-                    BookListDto dto = new BookListDto();
-                    dto.Id = b.Id;
-                    dto.Title = b.Title;
-
-                    result.Add(dto);
-                }
-            }
-
-            return result;
+                    Id = c.Id,
+                    Name = c.Name
+                })
+                .ToList();
         }
+
 
         public List<CategoryListDto> ListCategories()
         {

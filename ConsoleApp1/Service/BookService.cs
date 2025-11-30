@@ -10,12 +10,18 @@ namespace LibrarySystem.Service
 {
     public class BookService
     {
-        private readonly List<Book> _books;
+        private readonly LibraryContext _context;
+
+        private List<Book> _books => _context.Books;
+        private List<Author> _authors => _context.Authors;
+        private List<Category> _categories => _context.Categories;
+        private List<Publisher> _publishers => _context.Publishers;
+
         private readonly BookCopyService _bookCopyService;
         private int _idCounter = 1;
-        public BookService(List<Book> books, BookCopyService bookCopyService)
+        public BookService(LibraryContext context, BookCopyService bookCopyService)
         {
-            _books = books;
+            _context = context;
             _bookCopyService = bookCopyService;
         }
         public void AddBook(BookCreateDto dto)
@@ -31,6 +37,40 @@ namespace LibrarySystem.Service
             book.CreatedDate = DateTime.Now;
             _books.Add(book);
         }
+        public List<BookListDto> GetBooksByAuthor(int authorId)
+        {
+            var result =
+                from book in _books
+                join author in _authors on book.AuthorId equals author.Id
+                where author.Id == authorId && !book.IsDeleted
+                select new BookListDto
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    AuthorName = author.AuthorName
+                };
+
+            return result.ToList();
+        }
+        public List<BookListDto> GetBooksByCategoryId(int categoryId)
+        {
+            var result =
+                from book in _books
+                join category in _categories on book.CategoryId equals category.Id
+                where category.Id == categoryId && !book.IsDeleted
+                select new BookListDto
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    AuthorName = _authors.FirstOrDefault(a => a.Id == book.AuthorId)?.AuthorName,
+                    CategoryName = category.Name,
+                    PublisherName = _publishers.FirstOrDefault(p => p.Id == book.PublisherId)?.Name
+                };
+
+            return result.ToList();
+        }
+
+
         public List<BookListDto> GetAllBooks()
         {
             List<BookListDto> list = new List<BookListDto>();
@@ -131,76 +171,59 @@ namespace LibrarySystem.Service
         {
             return _bookCopyService.GetBorrowedCount(bookId);
         }
-
-        public List<BookListDto> SearchBooks(BookSearchDto dto)
+        public List<BookListDto> GetBooksByPublisher(int publisherId)
         {
+            var result =
+                from book in _books
+                join publisher in _publishers on book.PublisherId equals publisher.Id
+                where publisher.Id == publisherId && !book.IsDeleted
+                select new BookListDto
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    AuthorName = _authors.FirstOrDefault(a => a.Id == book.AuthorId)?.AuthorName,
+                    CategoryName = _categories.FirstOrDefault(c => c.Id == book.CategoryId)?.Name,
+                    PublisherName = publisher.Name
+                };
 
-            var query = _books
+            return result.ToList();
+        }
+
+
+        public List<BookListDto> Search(BookSearchDto dto)
+        {
+            return _books
                 .Where(b => !b.IsDeleted)
-                .AsQueryable();
-
-
-            if (!string.IsNullOrWhiteSpace(dto.Title))
-            {
-                var title = dto.Title.ToLower();
-                query = query.Where(b => b.Title.ToLower().Contains(title));
-            }
-
-            if (dto.PublishDate.HasValue)
-            {
-                var date = dto.PublishDate.Value.Date;
-                query = query.Where(b => b.PublishDate.Date == date);
-            }
-
-            if (!string.IsNullOrWhiteSpace(dto.Version))
-            {
-                var version = dto.Version.ToLower();
-                query = query.Where(b => b.Version.ToLower() == version);
-            }
-
-            if (dto.AuthorId.HasValue)
-            {
-                int authorId = dto.AuthorId.Value;
-                query = query.Where(b => b.AuthorId == authorId);
-            }
-
-            if (dto.CategoryId.HasValue)
-            {
-                int categoryId = dto.CategoryId.Value;
-                query = query.Where(b => b.CategoryId == categoryId);
-            }
-          
-            if (dto.Available.HasValue)
-            {
-                bool mustBeAvailable = dto.Available.Value;
-
-                query = query.Where(b =>
-                    mustBeAvailable
-                        ? _bookCopyService.GetAvailableCount(b.Id) > 0
-                        : _bookCopyService.GetAvailableCount(b.Id) == 0
-                );
-            }
-
-          
-            int page = dto.Page <= 0 ? 1 : dto.Page;
-            int pageSize = dto.PageSize <= 0 ? 10 : dto.PageSize;
-
-            int skip = (page - 1) * pageSize;
-
-            query = query
-                .Skip(skip)
-                .Take(pageSize);
-
-           
-            return query
+                .Where(b =>
+                    (dto.Text == null || b.Title.ToLower().Contains(dto.Text.ToLower())) &&
+                    (dto.Version == null || b.Version.ToLower() == dto.Version.ToLower()) &&
+                    (dto.PublishDate == null || b.PublishDate.Date == dto.PublishDate.Value.Date) &&
+                    (dto.AuthorId == null || b.AuthorId == dto.AuthorId) &&
+                    (dto.CategoryId == null || b.CategoryId == dto.CategoryId) &&
+                    (dto.PublisherId == null || b.PublisherId == dto.PublisherId) &&
+                    (dto.Number == null || b.Id == dto.Number) &&        
+                    (dto.Available == null ||
+                        (dto.Available.Value
+                            ? b.Copies.Any(c => c.IsAvailable && !c.IsDeleted)
+                            : !b.Copies.Any(c => c.IsAvailable && !c.IsDeleted)
+                        )
+                    )
+                )
+                .OrderBy(b => b.Title) 
+                .Skip((dto.Page - 1) * dto.PageSize)
+                .Take(dto.PageSize)
                 .Select(b => new BookListDto
                 {
                     Id = b.Id,
                     Title = b.Title,
-                    
+                    AuthorName = _context.Authors.FirstOrDefault(a => a.Id == b.AuthorId)?.AuthorName,
+                    CategoryName = _context.Categories.FirstOrDefault(c => c.Id == b.CategoryId)?.Name,
+                    PublisherName = _context.Publishers.FirstOrDefault(p => p.Id == b.PublisherId)?.Name
                 })
                 .ToList();
         }
+
+
     }
 
 }

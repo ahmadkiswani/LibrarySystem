@@ -1,12 +1,70 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySystem.DTOs;
+using LibrarySystem.DTOs.AuthorDtos;
+using LibrarySystem.Service;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystemAPIs.Controllers
 {
-    public class AuthorController : Controller
+    [ApiController]
+    [Route("api/Author")]
+    public class AuthorController : ControllerBase
     {
-        public IActionResult Index()
+        private readonly AuthorService _service;
+
+        public AuthorController(AuthorService service)
         {
-            return View();
+            _service = service;
+        }
+
+        [HttpPost]
+        public IActionResult Add([FromBody] AuthorCreateDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.AuthorName))
+                return BadRequest("AuthorName is required");
+
+            _service.AddAuthor(dto);
+            return Ok("Author added successfully");
+        }
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            return Ok(_service.GetAllAuthors());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var result = _service.GetAuthorById(id);
+
+            if (result == null)
+                return NotFound("Author not found");
+
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Edit(int id, [FromBody] AuthorUpdateDto dto)
+        {
+            if (id <= 0)
+                return BadRequest("Invalid ID");
+
+            _service.EditAuthor(id, dto);
+            return Ok("Author updated successfully");
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                _service.DeleteAuthor(id);
+                return Ok("Author deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

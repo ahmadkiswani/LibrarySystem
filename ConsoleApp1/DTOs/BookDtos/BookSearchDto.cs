@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
-namespace LibrarySystem.DTOs.BookDtos
+using LibrarySystem.DTOs;
+ namespace LibrarySystem.DTOs.BookDtos
 {
-    public class BookSearchDto
+    public class BookSearchDto:SearchBaseDto
     {
         public string? Title { get; set; }
         public DateTime? PublishDate { get; set; }
@@ -13,11 +13,9 @@ namespace LibrarySystem.DTOs.BookDtos
         public int? CategoryId { get; set; }
         public int? PublisherId { get; set; }
         public bool? Available { get; set; }
-
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
         public string? SortBy { get; set; }
         public bool SortDescending { get; set; } = false;
+        public int? Number { get; set; }
 
     }
 
