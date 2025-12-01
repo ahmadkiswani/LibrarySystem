@@ -33,11 +33,16 @@ namespace LibrarySystemAPIs.Controllers
         public IActionResult Get(int id)
         {
             var result = _service.GetUserById(id);
-            if (result == null)
-                return NotFound("User not found");
-            return Ok(result);
+            try
+            {
+                return Ok(_service.GetUserById(id));
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
-        [HttpPut("Update{id}")]
+        [HttpPut("Update/{id}")]
         public IActionResult Edit(int id, [FromBody] UserUpdateDto dto)
         {
             if (id <= 0)
@@ -45,7 +50,7 @@ namespace LibrarySystemAPIs.Controllers
             _service.EditUser(id, dto);
             return Ok("User updated successfully");
         }
-        [HttpPut("Delete{id}")]
+        [HttpPut("Delete/{id}")]
         public IActionResult Delete(int id)
         {
             try

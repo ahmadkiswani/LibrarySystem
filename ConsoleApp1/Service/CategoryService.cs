@@ -53,14 +53,17 @@ namespace LibrarySystem.Service
 
         public List<CategoryListDto> Search(CategorySearchDto dto)
         {
+            int page = dto.Page <= 0 ? 1 : dto.Page;
+            int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
+
             return _category
                 .Where(c => !c.IsDeleted)
                 .Where(c =>
                     (dto.Text == null || c.Name.ToLower().Contains(dto.Text.ToLower())) &&
                     (dto.Number == null || c.Id == dto.Number)
                 )
-                .Skip((dto.Page - 1) * dto.PageSize)
-                .Take(dto.PageSize)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(c => new CategoryListDto
                 {
                     Id = c.Id,

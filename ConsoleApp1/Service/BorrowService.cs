@@ -107,6 +107,8 @@ namespace LibrarySystem.Service
         }
         public List<Borrow> Search(BorrowSearchDto dto)
         {
+            int page = dto.Page <= 0 ? 1 : dto.Page;
+            int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
             return _borrow
                 .Where(b =>
                     (dto.Number == null || b.Id == dto.Number) &&
@@ -119,8 +121,8 @@ namespace LibrarySystem.Service
                         )
                     )
                 )
-                .Skip((dto.Page - 1) * dto.PageSize)
-                .Take(dto.PageSize)
+                .Skip((page - 1) * pageSize)
+                 .Take(pageSize)
                 .ToList();
         }
 

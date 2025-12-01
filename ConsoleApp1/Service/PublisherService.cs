@@ -78,14 +78,17 @@ namespace LibrarySystem.Service
         }
         public List<PublisherListDto> Search(PublisherSearchDto dto)
         {
+            int page = dto.Page <= 0 ? 1 : dto.Page;
+            int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
             return _publishers
                 .Where(p => !p.IsDeleted)
                 .Where(p =>
                     (dto.Text == null || p.Name.ToLower().Contains(dto.Text.ToLower())) &&
                     (dto.Number == null || p.Id == dto.Number)
                 )
-                .Skip((dto.Page - 1) * dto.PageSize)
-                .Take(dto.PageSize)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+
                 .Select(p => new PublisherListDto
                 {
                     Id = p.Id,

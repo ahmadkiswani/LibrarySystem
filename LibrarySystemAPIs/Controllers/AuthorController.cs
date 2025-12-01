@@ -37,13 +37,18 @@ namespace LibrarySystemAPIs.Controllers
         {
             var result = _service.GetAuthorById(id);
 
-            if (result == null)
-                return NotFound("Author not found");
+            try
+            {
+                return Ok(_service.GetAuthorById(id));
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
 
-            return Ok(result);
         }
 
-        [HttpPut("Update{id}")]
+        [HttpPut("Update/{id}")]
         public IActionResult Edit(int id, [FromBody] AuthorUpdateDto dto)
         {
             if (id <= 0)
@@ -53,7 +58,7 @@ namespace LibrarySystemAPIs.Controllers
             return Ok("Author updated successfully");
         }
 
-        [HttpPut("Delete{id}")]
+        [HttpPut("Delete/{id}")]
         public IActionResult Delete(int id)
         {
             try

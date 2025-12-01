@@ -26,15 +26,21 @@ namespace LibrarySystemAPIs.Controllers
         {
             return Ok(_service.ListPublishers());
         }
-        [HttpGet("{id}")]   
+        [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
             var result = _service.GetPublisherById(id);
-            if (result == null)
-                return NotFound("Publisher not found");
-            return Ok(result);
-        }   
-        [HttpPut("Update{id}")]
+            try
+            {
+                return Ok(_service.GetPublisherById(id));
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+
+            }
+        }
+            [HttpPut("Update/{id}")]
         public IActionResult Edit(int id, [FromBody] PublisherUpdateDto dto)
         {
             if (id <= 0)
@@ -42,7 +48,7 @@ namespace LibrarySystemAPIs.Controllers
             _service.EditPublisher(id, dto);
             return Ok("Publisher updated successfully");
         }
-        [HttpPut("Delete{id}")]
+        [HttpPut("Delete/{id}")]
         public IActionResult Delete(int id)
         {
             try

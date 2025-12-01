@@ -48,7 +48,8 @@ public class AuthorService
         var author = _authors.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
 
         if (author == null)
-            return null;
+            throw new Exception("Author not found");
+        ;
 
         AuthorDetailsDto dto = new AuthorDetailsDto();
         dto.Id = author.Id;
@@ -72,7 +73,7 @@ public class AuthorService
     {
         var author = _authors.FirstOrDefault(x => x.Id == id);
 
-        if (author != null)
+        if (author == null)
             throw new Exception("Author not found");
         author.IsDeleted = true;
         author.DeletedBy = 0;
@@ -80,16 +81,20 @@ public class AuthorService
     }
     public List<AuthorListDto> Search(AuthorSearchDto dto)
     {
+        int page = dto.Page <= 0 ? 1 : dto.Page;
+        int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
+
         return _authors
             .Where(a => !a.IsDeleted)
             .Where(a =>
                 (dto.Text == null || a.AuthorName.ToLower().Contains(dto.Text.ToLower())) &&
                 (dto.Number == null || a.Id == dto.Number)
             )
-            .Skip((dto.Page - 1) * dto.PageSize)
-            .Take(dto.PageSize)
-            .Select(a => new AuthorListDto
-            {
+               .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .Select(a => new AuthorListDto
+
+        {
                 Id = a.Id,
                 AuthorName = a.AuthorName
             })

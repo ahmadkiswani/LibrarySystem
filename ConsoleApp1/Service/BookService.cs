@@ -69,8 +69,6 @@ namespace LibrarySystem.Service
 
             return result.ToList();
         }
-
-
         public List<BookListDto> GetAllBooks()
         {
             List<BookListDto> list = new List<BookListDto>();
@@ -87,6 +85,8 @@ namespace LibrarySystem.Service
         public BookDetailsDto GetBookById(int id)
         {
             Book book = _books.FirstOrDefault(b => b.Id == id && !b.IsDeleted);
+            if (book == null)
+                throw new Exception("Book not found");
             BookDetailsDto dto = new BookDetailsDto();
             dto.Id = book.Id;
             dto.Title = book.Title;
@@ -110,7 +110,6 @@ namespace LibrarySystem.Service
 
             return dto;
         }
-
         public void EditBook(int id, BookUpdateDto dto)
         {
             Book book = _books.FirstOrDefault(b => b.Id == id);
@@ -126,7 +125,6 @@ namespace LibrarySystem.Service
                 book.LastModifiedDate = DateTime.Now;
             }
         }
-
         public void DeleteBook(int id)
         {
             var book = _books.FirstOrDefault(b => b.Id == id);
@@ -154,23 +152,6 @@ namespace LibrarySystem.Service
                 Console.WriteLine($"Book {book.Id} auto-soft-deleted because all copies are deleted");
             }
         }
-
-
-
-        public int GetTotalCopies(int bookId)
-        {
-            return _bookCopyService.GetAllCopiesForBook(bookId).Count;
-        }
-
-        public int BookCopyService(int bookId)
-        {
-            return _bookCopyService.GetAvailableCount(bookId);
-        }
-
-        public int GetBorrowedCopies(int bookId)
-        {
-            return _bookCopyService.GetBorrowedCount(bookId);
-        }
         public List<BookListDto> GetBooksByPublisher(int publisherId)
         {
             var result =
@@ -188,10 +169,11 @@ namespace LibrarySystem.Service
 
             return result.ToList();
         }
-
-
         public List<BookListDto> Search(BookSearchDto dto)
         {
+            int page = dto.Page <= 0 ? 1 : dto.Page;
+            int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
+            string text = dto.Text?.Trim().ToLower() ?? "";
             return _books
                 .Where(b => !b.IsDeleted)
                 .Where(b =>
@@ -209,11 +191,12 @@ namespace LibrarySystem.Service
                         )
                     )
                 )
-                .OrderBy(b => b.Title) 
-                .Skip((dto.Page - 1) * dto.PageSize)
-                .Take(dto.PageSize)
-                .Select(b => new BookListDto
-                {
+                    .OrderBy(b => b.Title)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(b => new BookListDto
+
+        {
                     Id = b.Id,
                     Title = b.Title,
                     AuthorName = _context.Authors.FirstOrDefault(a => a.Id == b.AuthorId)?.AuthorName,

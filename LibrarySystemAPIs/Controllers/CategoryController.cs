@@ -35,13 +35,19 @@ namespace LibrarySystemAPIs.Controllers
         public IActionResult GetById(int id)
         {
             var category = _service.GetCategoryById(id);
-            if (category == null)
-                return NotFound("Category not found");
-
-            return Ok(category);
+            {
+                try
+                {
+                    return Ok(_service.GetCategoryById(id));
+                }
+                catch (Exception ex)
+                {
+                    return NotFound(ex.Message);
+                }
+            }
         }
 
-        [HttpPut("Update{id}")]
+        [HttpPut("Update/{id}")]
         public IActionResult Edit(int id, [FromBody] CategoryUpdateDto dto)
         {
             if (id <= 0)
@@ -51,7 +57,7 @@ namespace LibrarySystemAPIs.Controllers
             return Ok("Category updated successfully");
         }
 
-        [HttpPut("Delete{id}")]
+        [HttpPut("Delete/{id}")]
         public IActionResult Delete(int id)
         {
             try

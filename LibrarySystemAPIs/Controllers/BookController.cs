@@ -46,15 +46,18 @@ namespace LibrarySystemAPIs.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var book = _service.GetBookById(id);
-
-            if (book == null)
-                return NotFound("Book not found");
-
-            return Ok(book);
+            try
+            {
+                return Ok(_service.GetBookById(id));
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        
         }
 
-        [HttpPut("Update{id}")]
+        [HttpPut("Update/{id}")]
         public IActionResult Edit(int id, [FromBody] BookUpdateDto dto)
         {
             if (id <= 0)
@@ -64,7 +67,7 @@ namespace LibrarySystemAPIs.Controllers
             return Ok("Book updated successfully");
         }
 
-        [HttpPut("Delete{id}")]
+        [HttpPut("Delete/{id}")]
         public IActionResult Delete(int id)
         {
             try
@@ -81,13 +84,15 @@ namespace LibrarySystemAPIs.Controllers
         [HttpGet("search")]
         public IActionResult Search([FromQuery] BookSearchDto dto)
         {
-            if (dto.Page <= 0)
-                return BadRequest("Page must be >= 1");
+            try
+            {
+                return Ok(_service.Search(dto));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
-            if (dto.PageSize <= 0 || dto.PageSize > 200)
-                return BadRequest("PageSize must be between 1–200");
-
-            return Ok(_service.Search(dto));
         }
     }
 }

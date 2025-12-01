@@ -77,14 +77,32 @@ namespace LibrarySystem.Service
                 return _inventory.Count(x => x.BookId == bookId && !x.IsAvailable && !x.IsDeleted);
             }
 
-            public List<BookCopy> GetAllCopiesForBook(int bookId)
-            {
-                return _inventory.Where(x => x.BookId == bookId && !x.IsDeleted).ToList();
-            }
-
-            public BookCopy GetSpecificCopy(int availableBookId)
-            {
-                return _inventory.FirstOrDefault(x => x.Id == availableBookId && !x.IsDeleted);
-            }
+        public List<BookCopy> GetAllCopiesForBook(int bookId)
+        {
+            return _inventory.Where(x => x.BookId == bookId && !x.IsDeleted).ToList();
         }
+
+        public BookCopy GetSpecificCopy(int availableBookId)
+        {
+            var copy = _inventory.FirstOrDefault(x => x.Id == availableBookId && !x.IsDeleted);
+            if (copy == null)
+                throw new Exception("Copy not found");
+            return copy;
+        }
+        public int GetTotalCopies(int bookId)
+        {
+            return _inventory.Count(x => x.BookId == bookId && !x.IsDeleted);
+        }
+
+        public int GetAvailableCopies(int bookId)
+        {
+            return _inventory.Count(x => x.BookId == bookId && x.IsAvailable && !x.IsDeleted);
+        }
+
+        public int GetBorrowedCopies(int bookId)
+        {
+            return _inventory.Count(x => x.BookId == bookId && !x.IsAvailable && !x.IsDeleted);
+        }
+
+    }
 }
