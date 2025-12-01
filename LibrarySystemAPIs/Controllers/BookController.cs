@@ -84,15 +84,8 @@ namespace LibrarySystemAPIs.Controllers
         [HttpGet("search")]
         public IActionResult Search([FromQuery] BookSearchDto dto)
         {
-            try
-            {
-                return Ok(_service.Search(dto));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
+            var result = _service.Search(dto);
+            return Ok(result);
         }
     }
 }
