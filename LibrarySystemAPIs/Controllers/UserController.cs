@@ -37,7 +37,7 @@ namespace LibrarySystemAPIs.Controllers
                 return NotFound("User not found");
             return Ok(result);
         }
-        [HttpPut("{id}")]
+        [HttpPut("Update{id}")]
         public IActionResult Edit(int id, [FromBody] UserUpdateDto dto)
         {
             if (id <= 0)

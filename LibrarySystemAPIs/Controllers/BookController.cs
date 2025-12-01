@@ -54,7 +54,7 @@ namespace LibrarySystemAPIs.Controllers
             return Ok(book);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("Update{id}")]
         public IActionResult Edit(int id, [FromBody] BookUpdateDto dto)
         {
             if (id <= 0)

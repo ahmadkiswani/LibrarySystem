@@ -43,7 +43,7 @@ namespace LibrarySystemAPIs.Controllers
             return Ok(result);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("Update{id}")]
         public IActionResult Edit(int id, [FromBody] AuthorUpdateDto dto)
         {
             if (id <= 0)

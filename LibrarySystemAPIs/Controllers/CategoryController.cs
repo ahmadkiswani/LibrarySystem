@@ -41,7 +41,7 @@ namespace LibrarySystemAPIs.Controllers
             return Ok(category);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("Update{id}")]
         public IActionResult Edit(int id, [FromBody] CategoryUpdateDto dto)
         {
             if (id <= 0)

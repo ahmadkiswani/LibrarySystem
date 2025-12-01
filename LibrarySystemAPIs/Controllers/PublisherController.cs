@@ -34,7 +34,7 @@ namespace LibrarySystemAPIs.Controllers
                 return NotFound("Publisher not found");
             return Ok(result);
         }   
-        [HttpPut("{id}")]
+        [HttpPut("Update{id}")]
         public IActionResult Edit(int id, [FromBody] PublisherUpdateDto dto)
         {
             if (id <= 0)
