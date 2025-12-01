@@ -80,10 +80,16 @@ namespace LibrarySystem.Service
                 copy.LastModifiedDate = DateTime.Now;
             }
         }
+        
+        
         public List<Borrow> GetBorrowedBooksByUser(int userId)
         {
+            if (!_user.Any(u => u.Id == userId))
+                throw new Exception("User not found");
+
             return _borrow.Where(b => b.UserId == userId).ToList();
         }
+        
 
         public void CheckOverdue()
         {

@@ -54,10 +54,19 @@ namespace LibrarySystemAPIs.Controllers
         [HttpGet("User/{userId}")]
         public IActionResult GetUserBorrowed(int userId)
         {
-            if (userId <= 0)
-                return BadRequest("Invalid user ID");
-            var result = _service.GetBorrowedBooksByUser(userId);
-            return Ok(result);
+            try
+            {
+                var result = _service.GetBorrowedBooksByUser(userId);
+
+                if (result == null || result.Count == 0)
+                    return NotFound("User has no borrowed books");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

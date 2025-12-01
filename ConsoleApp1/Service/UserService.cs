@@ -5,7 +5,6 @@ using LibrarySystem.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 namespace LibrarySystem.Service
 {
     public class UserService
@@ -18,7 +17,6 @@ namespace LibrarySystem.Service
         {
             _context = context;
         }
-
 
         public void AddUser(UserCreateDto dto)
         {
