@@ -42,7 +42,7 @@ namespace LibrarySystemAPIs.Controllers
             _service.EditPublisher(id, dto);
             return Ok("Publisher updated successfully");
         }
-        [HttpDelete("{id}")]
+        [HttpPut("Delete{id}")]
         public IActionResult Delete(int id)
         {
             try

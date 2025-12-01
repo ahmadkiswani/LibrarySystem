@@ -53,7 +53,7 @@ namespace LibrarySystemAPIs.Controllers
             return Ok("Author updated successfully");
         }
 
-        [HttpDelete("{id}")]
+        [HttpPut("Delete{id}")]
         public IActionResult Delete(int id)
         {
             try

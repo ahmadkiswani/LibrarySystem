@@ -51,7 +51,7 @@ namespace LibrarySystemAPIs.Controllers
             return Ok("Category updated successfully");
         }
 
-        [HttpDelete("{id}")]
+        [HttpPut("Delete{id}")]
         public IActionResult Delete(int id)
         {
             try

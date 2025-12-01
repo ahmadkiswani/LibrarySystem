@@ -32,7 +32,7 @@ namespace LibrarySystemAPIs.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpPut("Delete{id}")]
         public IActionResult Delete(int id)
         {
             if (id <= 0)

@@ -45,7 +45,7 @@ namespace LibrarySystemAPIs.Controllers
             _service.EditUser(id, dto);
             return Ok("User updated successfully");
         }
-        [HttpDelete("{id}")]
+        [HttpPut("Delete{id}")]
         public IActionResult Delete(int id)
         {
             try
