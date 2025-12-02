@@ -8,9 +8,7 @@ namespace LibrarySystem.DTOs.AuthorDtos
 {
     public class AuthorSearchDto : SearchBaseDto
     {
-        
-        
-            public int? Number { get; set; }
+          public int? Number { get; set; }
         
 
     }

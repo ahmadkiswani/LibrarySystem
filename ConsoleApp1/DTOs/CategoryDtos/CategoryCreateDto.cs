@@ -7,8 +7,8 @@ namespace LibrarySystem.DTOs
 {
     public class CategoryCreateDto
     {
-        [Required(ErrorMessage = "Category name is required")]
-        [StringLength(50, MinimumLength = 2, ErrorMessage = "Category must be between 2 and 50 characters")]
+        [Required]
+        [MaxLength(50)]
         public string Name { get; set; }
     }
 }

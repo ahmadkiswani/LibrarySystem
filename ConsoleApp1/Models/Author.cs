@@ -6,13 +6,15 @@ namespace LibrarySystem.Models
 {
     public class Author : AuditLog
     {
-        [Key]
-        public int Id { get; set; }  
+        [Required]
+        public int Id { get; set; } 
+
 
         [Required]
-        [MaxLength(200)]
+        [MaxLength(50)]
         public string AuthorName { get; set; } = string.Empty;
 
         public ICollection<Book> Books { get; set; } = new List<Book>();
+        public bool IsDeleted { get; set; } = false; 
     }
 }

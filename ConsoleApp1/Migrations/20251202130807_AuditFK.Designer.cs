@@ -4,6 +4,7 @@ using LibrarySystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibrarySystem.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251202130807_AuditFK")]
+    partial class AuditFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,6 +122,12 @@ namespace LibrarySystem.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("LastModifiedBy");
+
                     b.ToTable("Books");
                 });
 
@@ -168,6 +177,12 @@ namespace LibrarySystem.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BookId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("LastModifiedBy");
 
                     b.HasIndex("PublisherId");
 
@@ -228,6 +243,12 @@ namespace LibrarySystem.Migrations
 
                     b.HasIndex("BookCopyId");
 
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("LastModifiedBy");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Borrows");
@@ -269,6 +290,12 @@ namespace LibrarySystem.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("LastModifiedBy");
+
                     b.ToTable("Categories");
                 });
 
@@ -307,6 +334,12 @@ namespace LibrarySystem.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("LastModifiedBy");
 
                     b.ToTable("Publishers");
                 });
@@ -418,6 +451,22 @@ namespace LibrarySystem.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("LastModifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Author");
 
                     b.Navigation("Category");
@@ -430,6 +479,22 @@ namespace LibrarySystem.Migrations
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("LastModifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LibrarySystem.Models.Publisher", "Publisher")
                         .WithMany("BookCopies")
@@ -450,6 +515,22 @@ namespace LibrarySystem.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("LastModifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LibrarySystem.Models.User", "User")
                         .WithMany("Borrows")
                         .HasForeignKey("UserId")
@@ -459,6 +540,44 @@ namespace LibrarySystem.Migrations
                     b.Navigation("BookCopy");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Models.Category", b =>
+                {
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("LastModifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Models.Publisher", b =>
+                {
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("LastModifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.User", b =>

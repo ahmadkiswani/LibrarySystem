@@ -1,10 +1,12 @@
 ﻿using LibrarySystem.Models;
 using Microsoft.EntityFrameworkCore;
+
 namespace LibrarySystem.Data
 {
     public class LibraryDbContext : DbContext
     {
         public LibraryDbContext() { }
+
         public LibraryDbContext(DbContextOptions<LibraryDbContext> options)
             : base(options) { }
 
@@ -21,13 +23,14 @@ namespace LibrarySystem.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Ignore<AuditLog>();
+
             modelBuilder.Entity<Book>()
                 .HasOne(b => b.Author)
                 .WithMany(a => a.Books)
                 .HasForeignKey(b => b.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            
             modelBuilder.Entity<Book>()
                 .HasOne(b => b.Category)
                 .WithMany(c => c.Books)
@@ -40,7 +43,39 @@ namespace LibrarySystem.Data
                 .HasForeignKey(bc => bc.BookId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Borrow>()
+                .HasOne(b => b.BookCopy)
+                .WithMany(c => c.BorrowRecords)
+                .HasForeignKey(b => b.BookCopyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Borrow>()
+                .HasOne(b => b.User)
+                .WithMany(u => u.Borrows)
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(u => u.CreatedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(u => u.LastModifiedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(u => u.DeletedBy)
+                .OnDelete(DeleteBehavior.Restrict);
         }
+
+        
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -48,8 +83,5 @@ namespace LibrarySystem.Data
                 optionsBuilder.UseSqlServer("Server=SedraPay;Database=LibraryDB;Trusted_Connection=True;TrustServerCertificate=True;");
             }
         }
-
-
     }
-  }
-                
+}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace LibrarySystem.DTOs
@@ -7,6 +8,7 @@ namespace LibrarySystem.DTOs
     public class AuthorListDto
     {
         public int Id { get; set; }
+        [MaxLength(50)]
         public string AuthorName { get; set; }
     }
 }

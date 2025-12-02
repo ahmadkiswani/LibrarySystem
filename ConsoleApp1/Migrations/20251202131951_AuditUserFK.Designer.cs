@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibrarySystem.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    [Migration("20251202081129_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251202131951_AuditUserFK")]
+    partial class AuditUserFK
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,8 +35,8 @@ namespace LibrarySystem.Migrations
 
                     b.Property<string>("AuthorName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
@@ -100,18 +100,21 @@ namespace LibrarySystem.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("PublishDate")
+                        .HasMaxLength(50)
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("TotalCopies")
                         .HasColumnType("int");
 
                     b.Property<string>("Version")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -135,7 +138,8 @@ namespace LibrarySystem.Migrations
 
                     b.Property<string>("CopyCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
@@ -263,8 +267,8 @@ namespace LibrarySystem.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -302,8 +306,8 @@ namespace LibrarySystem.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -341,18 +345,24 @@ namespace LibrarySystem.Migrations
 
                     b.Property<string>("UserEmail")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("UserTypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DeletedBy");
+
+                    b.HasIndex("LastModifiedBy");
 
                     b.HasIndex("UserTypeId");
 
@@ -366,6 +376,27 @@ namespace LibrarySystem.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("TypeName")
                         .IsRequired()
@@ -419,13 +450,13 @@ namespace LibrarySystem.Migrations
                     b.HasOne("LibrarySystem.Models.BookCopy", "BookCopy")
                         .WithMany("BorrowRecords")
                         .HasForeignKey("BookCopyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("LibrarySystem.Models.User", "User")
                         .WithMany("Borrows")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("BookCopy");
@@ -435,6 +466,22 @@ namespace LibrarySystem.Migrations
 
             modelBuilder.Entity("LibrarySystem.Models.User", b =>
                 {
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LibrarySystem.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("LastModifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LibrarySystem.Models.UserType", "UserType")
                         .WithMany("Users")
                         .HasForeignKey("UserTypeId")

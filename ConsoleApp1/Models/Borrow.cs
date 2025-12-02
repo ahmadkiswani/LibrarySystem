@@ -5,6 +5,7 @@ namespace LibrarySystem.Models
 {
     public class Borrow : AuditLog
     {
+        [Required]
         public int Id { get; set; }
 
         public int UserId { get; set; }
@@ -16,9 +17,8 @@ namespace LibrarySystem.Models
         public DateTime BorrowDate { get; set; }
         public DateTime? ReturnDate { get; set; }
         public DateTime DueDate { get; set; }
-        public bool IsOverdue { get; set; }
-         public int? OverdueDays { get; set; }
-        
+        public bool IsOverdue { get; set; } = false;
+        public int? OverdueDays { get; set; } = 0;
 
     }
 }

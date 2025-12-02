@@ -15,7 +15,7 @@ namespace LibrarySystem.DTOs.BookDtos
         public DateTime PublishDate { get; set; }
 
         [Required]
-        [StringLength(20)]
+        [MaxLength(20)]
         public string Version { get; set; }
         [Required]
         public int AuthorId { get; set; }
