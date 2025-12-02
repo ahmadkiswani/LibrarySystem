@@ -54,5 +54,43 @@ namespace LibrarySystemAPIs.Controllers
         {
             return Ok(_service.ListBookCopies());
         }
+
+        [HttpGet("book/{bookId}")]
+        public IActionResult GetCopiesForBook(int bookId)
+        {
+            return Ok(_service.GetAllCopiesForBook(bookId));
+        }
+
+        [HttpGet("available/{bookId}")]
+        public IActionResult GetAvailable(int bookId)
+        {
+            return Ok(_service.GetAvailableCount(bookId));
+        }
+
+        [HttpGet("borrowed/{bookId}")]
+        public IActionResult GetBorrowed(int bookId)
+        {
+            return Ok(_service.GetBorrowedCount(bookId));
+        }
+
+        [HttpGet("total/{bookId}")]
+        public IActionResult GetTotal(int bookId)
+        {
+            return Ok(_service.GetTotalCopies(bookId));
+        }
+
+        [HttpGet("copy/{id}")]
+        public IActionResult GetSpecific(int id)
+        {
+            try
+            {
+                return Ok(_service.GetSpecificCopy(id));
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
     }
 }

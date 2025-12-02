@@ -1,7 +1,8 @@
-﻿using LibrarySystem.DTOs;
-using LibrarySystem.DTOs.AvailableBookDto;
+﻿using LibrarySystem.Data;  
+using LibrarySystem.DTOs;
 using LibrarySystem.DTOs.BookDtos;
 using LibrarySystem.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,171 +11,143 @@ namespace LibrarySystem.Service
 {
     public class BookService
     {
-        private readonly LibraryContext _context;
-
-        private List<Book> _books => _context.Books;
-        private List<Author> _authors => _context.Authors;
-        private List<Category> _categories => _context.Categories;
-        private List<Publisher> _publishers => _context.Publishers;
-
+        private readonly LibraryDbContext _context;
         private readonly BookCopyService _bookCopyService;
-        private int _idCounter = 1;
-        public BookService(LibraryContext context, BookCopyService bookCopyService)
+
+        public BookService(LibraryDbContext context, BookCopyService bookCopyService)
         {
             _context = context;
             _bookCopyService = bookCopyService;
         }
+
         public void AddBook(BookCreateDto dto)
         {
-            Book book = new Book();
-            book.Id = _idCounter++;
+            var book = new Book
+            {
+                Title = dto.Title,
+                PublishDate = dto.PublishDate,
+                Version = dto.Version,
+                AuthorId = dto.AuthorId,
+                CategoryId = dto.CategoryId,
+                CreatedBy = 1,
+                CreatedDate = DateTime.Now
+            };
+
+            _context.Books.Add(book);
+            _context.SaveChanges();
+        }
+
+        public List<BookListDto> GetBooksByAuthor(int authorId)
+        {
+            return _context.Books
+                .Where(b => b.AuthorId == authorId && !b.IsDeleted)
+                .Select(b => new BookListDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    AuthorName = b.Author.AuthorName
+                })
+                .ToList();
+        }
+
+        public List<BookListDto> GetBooksByCategoryId(int categoryId)
+        {
+            return _context.Books
+                .Where(b => b.CategoryId == categoryId && !b.IsDeleted)
+                .Select(b => new BookListDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    AuthorName = b.Author.AuthorName,
+                    CategoryName = b.Category.Name,
+                })
+                .ToList();
+        }
+
+        public List<BookListDto> GetAllBooks()
+        {
+            return _context.Books
+                .Where(b => !b.IsDeleted)
+                .Select(b => new BookListDto
+                {
+                    Id = b.Id,
+                    Title = b.Title
+                })
+                .ToList();
+        }
+
+        public BookDetailsDto GetBookById(int id)
+        {
+            var book = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Category)
+                .Include(b => b.Copies)
+                .FirstOrDefault(b => b.Id == id && !b.IsDeleted);
+
+            if (book == null)
+                throw new Exception("Book not found");
+
+            return new BookDetailsDto
+            {
+                Id = book.Id,
+                Title = book.Title,
+                PublishDate = book.PublishDate,
+                Version = book.Version,
+                AuthorId = book.AuthorId,
+                CategoryId = book.CategoryId,
+                AuthorName = book.Author.AuthorName,
+                CategoryName = book.Category.Name,
+                TotalCopies = book.TotalCopies
+            };
+        }
+
+        public void EditBook(int id, BookUpdateDto dto)
+        {
+            var book = _context.Books.FirstOrDefault(b => b.Id == id && !b.IsDeleted);
+
+            if (book == null)
+                throw new Exception("Book not found");
+
             book.Title = dto.Title;
             book.PublishDate = dto.PublishDate;
             book.Version = dto.Version;
             book.AuthorId = dto.AuthorId;
             book.CategoryId = dto.CategoryId;
-            book.CreatedBy = 1;
-            book.CreatedDate = DateTime.Now;
-            _books.Add(book);
+            book.LastModifiedBy = 1;
+            book.LastModifiedDate = DateTime.Now;
+
+            _context.SaveChanges();
         }
-        public List<BookListDto> GetBooksByAuthor(int authorId)
-        {
-            var result =
-                from book in _books
-                join author in _authors on book.AuthorId equals author.Id
-                where author.Id == authorId && !book.IsDeleted
-                select new BookListDto
-                {
-                    Id = book.Id,
-                    Title = book.Title,
-                    AuthorName = author.AuthorName
-                };
 
-            return result.ToList();
-        }
-        public List<BookListDto> GetBooksByCategoryId(int categoryId)
-        {
-            var result =
-                from book in _books
-                join category in _categories on book.CategoryId equals category.Id
-                where category.Id == categoryId && !book.IsDeleted
-                select new BookListDto
-                {
-                    Id = book.Id,
-                    Title = book.Title,
-                    AuthorName = _authors.FirstOrDefault(a => a.Id == book.AuthorId)?.AuthorName,
-                    CategoryName = category.Name,
-                    PublisherName = _publishers.FirstOrDefault(p => p.Id == book.PublisherId)?.Name
-                };
-
-            return result.ToList();
-        }
-        public List<BookListDto> GetAllBooks()
-        {
-            List<BookListDto> list = new List<BookListDto>();
-            return _books
-                .Where(b => !b.IsDeleted)
-                .Select(book => new BookListDto
-                {
-                 Id = book.Id,
-                 Title = book.Title
-                })
-                 .ToList();
-
-        }
-        public BookDetailsDto GetBookById(int id)
-        {
-            Book book = _books.FirstOrDefault(b => b.Id == id && !b.IsDeleted);
-            if (book == null)
-                throw new Exception("Book not found");
-            BookDetailsDto dto = new BookDetailsDto();
-            dto.Id = book.Id;
-            dto.Title = book.Title;
-            dto.PublishDate = book.PublishDate;
-            dto.Version = book.Version;
-            dto.AuthorId = book.AuthorId;
-            dto.CategoryId = book.CategoryId;
-            dto.TotalCopies = book.TotalCopies;
-            dto.AuthorName = book.Author != null && !book.Author.IsDeleted
-                ? book.Author.AuthorName
-                : "Unknown";
-
-            dto.CategoryName = book.Category != null && !book.Category.IsDeleted
-                ? book.Category.Name
-                : "Unknown";
-
-            dto.PublisherName = book.Publisher != null && !book.Publisher.IsDeleted
-                ? book.Publisher.Name
-                : "Unknown";
-
-
-            return dto;
-        }
-        public void EditBook(int id, BookUpdateDto dto)
-        {
-            Book book = _books.FirstOrDefault(b => b.Id == id);
-
-            if (book != null)
-            {
-                book.Title = dto.Title;
-                book.PublishDate = dto.PublishDate;
-                book.Version = dto.Version;
-                book.AuthorId = dto.AuthorId;
-                book.CategoryId = dto.CategoryId;
-                book.LastModifiedBy = 1;
-                book.LastModifiedDate = DateTime.Now;
-            }
-        }
         public void DeleteBook(int id)
         {
-            var book = _books.FirstOrDefault(b => b.Id == id);
+            var book = _context.Books
+                .Include(b => b.Copies)
+                .ThenInclude(c => c.BorrowRecords)
+                .FirstOrDefault(b => b.Id == id);
 
             if (book == null)
                 throw new Exception("❗ Book not found");
 
-            bool hasActiveBorrow = book.Copies.Any(copy => copy.BorrowRecords.Any(bc => bc.ReturnDate == null));
+            bool hasActiveBorrow = book.Copies.Any(copy => copy.BorrowRecords.Any(br => br.ReturnDate == null));
+
             if (hasActiveBorrow)
                 throw new Exception("❗ Cannot delete book — copies are currently borrowed");
 
             book.IsDeleted = true;
             book.DeletedDate = DateTime.Now;
-            book.DeletedBy = id;
-            Console.WriteLine($"book {id} soft deleted");
+            book.DeletedBy = 1;
 
-            bool allCopiesDeleted = book.Copies.All(c => c.IsDeleted);
-            hasActiveBorrow = book.Copies.Any(c => c.BorrowRecords.Any(b => b.ReturnDate == null));
-
-            if (allCopiesDeleted && !hasActiveBorrow)
-            {
-                book.IsDeleted = true;
-                book.LastModifiedBy = 1;
-                book.LastModifiedDate = DateTime.Now;
-                Console.WriteLine($"Book {book.Id} auto-soft-deleted because all copies are deleted");
-            }
+            _context.SaveChanges();
         }
-        public List<BookListDto> GetBooksByPublisher(int publisherId)
-        {
-            var result =
-                from book in _books
-                join publisher in _publishers on book.PublisherId equals publisher.Id
-                where publisher.Id == publisherId && !book.IsDeleted
-                select new BookListDto
-                {
-                    Id = book.Id,
-                    Title = book.Title,
-                    AuthorName = _authors.FirstOrDefault(a => a.Id == book.AuthorId)?.AuthorName,
-                    CategoryName = _categories.FirstOrDefault(c => c.Id == book.CategoryId)?.Name,
-                    PublisherName = publisher.Name
-                };
 
-            return result.ToList();
-        }
         public List<BookListDto> Search(BookSearchDto dto)
         {
             int page = dto.Page <= 0 ? 1 : dto.Page;
             int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
             string text = dto.Text?.Trim().ToLower() ?? "";
-            return _books
+
+            return _context.Books
                 .Where(b => !b.IsDeleted)
                 .Where(b =>
                     (dto.Text == null || b.Title.ToLower().Contains(dto.Text.ToLower())) &&
@@ -182,31 +155,19 @@ namespace LibrarySystem.Service
                     (dto.PublishDate == null || b.PublishDate.Date == dto.PublishDate.Value.Date) &&
                     (dto.AuthorId == null || b.AuthorId == dto.AuthorId) &&
                     (dto.CategoryId == null || b.CategoryId == dto.CategoryId) &&
-                    (dto.PublisherId == null || b.PublisherId == dto.PublisherId) &&
-                    (dto.Number == null || b.Id == dto.Number) &&        
-                    (dto.Available == null ||
-                        (dto.Available.Value
-                            ? b.Copies.Any(c => c.IsAvailable && !c.IsDeleted)
-                            : !b.Copies.Any(c => c.IsAvailable && !c.IsDeleted)
-                        )
-                    )
+                    (dto.Number == null || b.Id == dto.Number)
                 )
-                    .OrderBy(b => b.Title)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(b => new BookListDto
-
-        {
+                .OrderBy(b => b.Title)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(b => new BookListDto
+                {
                     Id = b.Id,
                     Title = b.Title,
-                    AuthorName = _context.Authors.FirstOrDefault(a => a.Id == b.AuthorId)?.AuthorName,
-                    CategoryName = _context.Categories.FirstOrDefault(c => c.Id == b.CategoryId)?.Name,
-                    PublisherName = _context.Publishers.FirstOrDefault(p => p.Id == b.PublisherId)?.Name
+                    AuthorName = b.Author.AuthorName,
+                    CategoryName = b.Category.Name
                 })
                 .ToList();
         }
-
-
     }
-
 }

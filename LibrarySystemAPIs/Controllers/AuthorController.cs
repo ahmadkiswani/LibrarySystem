@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibrarySystemAPIs.Controllers
 {
     [ApiController]
-    [Route("api/Author")]
+    [Route("api/[controller]")]
     public class AuthorController : ControllerBase
     {
         private readonly AuthorService _service;
@@ -35,27 +35,32 @@ namespace LibrarySystemAPIs.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var result = _service.GetAuthorById(id);
-
             try
             {
-                return Ok(_service.GetAuthorById(id));
+                var result = _service.GetAuthorById(id);
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
-
         }
 
-        [HttpPut("Update/{id}")]
+        [HttpPut("{id}")]
         public IActionResult Edit(int id, [FromBody] AuthorUpdateDto dto)
         {
             if (id <= 0)
                 return BadRequest("Invalid ID");
 
-            _service.EditAuthor(id, dto);
-            return Ok("Author updated successfully");
+            try
+            {
+                _service.EditAuthor(id, dto);
+                return Ok("Author updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("Delete/{id}")]

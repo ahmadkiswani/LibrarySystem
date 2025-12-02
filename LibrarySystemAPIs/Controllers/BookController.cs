@@ -5,7 +5,7 @@ using LibrarySystem.DTOs.BookDtos;
 namespace LibrarySystemAPIs.Controllers
 {
     [ApiController]
-    [Route("api/Book")]
+    [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
         private readonly BookService _service;
@@ -30,9 +30,6 @@ namespace LibrarySystemAPIs.Controllers
             if (dto.CategoryId <= 0)
                 return BadRequest("Invalid CategoryId");
 
-            if (dto.PublisherId <= 0)
-                return BadRequest("Invalid PublisherId");
-
             _service.AddBook(dto);
             return Ok("Book added successfully");
         }
@@ -54,7 +51,7 @@ namespace LibrarySystemAPIs.Controllers
             {
                 return NotFound(ex.Message);
             }
-        
+
         }
 
         [HttpPut("Update/{id}")]

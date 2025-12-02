@@ -16,10 +16,11 @@ namespace LibrarySystem.Models
         [Required]
         [EmailAddress]
         [MaxLength(200)]
-        public string UserEmail { get; set; }        
+        public string UserEmail { get; set; }
+        public int UserTypeId { get; set; }
+        public UserType UserType { get; set; }
 
-        [Required]
-        public ICollection<Borrow> Borrows { get; set; } 
+        public ICollection<Borrow> Borrows { get; set; } = new List<Borrow>();
     }
 
  

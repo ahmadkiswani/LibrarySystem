@@ -11,8 +11,9 @@ namespace LibrarySystem.Models
 
         [Required]
         [MaxLength(150)]
-        public string Name { get; set; } 
+        public string Name { get; set; }
+        public ICollection<BookCopy> BookCopies { get; set; } = new List<BookCopy>();
 
-        public ICollection<Book> Books { get; set; } 
+
     }
 }

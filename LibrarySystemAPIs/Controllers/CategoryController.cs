@@ -16,7 +16,7 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add(CategoryCreateDto dto)
+        public IActionResult Add([FromBody] CategoryCreateDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Name))
                 return BadRequest("Name is required");
@@ -34,16 +34,14 @@ namespace LibrarySystemAPIs.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var category = _service.GetCategoryById(id);
+            try
             {
-                try
-                {
-                    return Ok(_service.GetCategoryById(id));
-                }
-                catch (Exception ex)
-                {
-                    return NotFound(ex.Message);
-                }
+                var category = _service.GetCategoryById(id);
+                return Ok(category);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
             }
         }
 
