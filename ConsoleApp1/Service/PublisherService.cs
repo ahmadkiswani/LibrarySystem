@@ -19,7 +19,7 @@ namespace LibrarySystem.Service
             var publisher = new Publisher
             {
                 Name = dto.Name,
-                CreatedBy = 1,
+                CreatedBy = 0,
                 CreatedDate = DateTime.Now
             };
 

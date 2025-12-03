@@ -23,7 +23,7 @@ namespace LibrarySystem.Service
             var author = new Author
             {
                 AuthorName = dto.AuthorName,
-                CreatedBy = 1,
+                CreatedBy = 0,
                 CreatedDate = DateTime.Now
             };
 

@@ -13,7 +13,7 @@ namespace LibrarySystem.Service
             _bookRepo = bookRepo;
         }
 
-        public async Task AddBook(BookCreateDto dto)
+        public async Task<int> AddBook(BookCreateDto dto)
         {
             var book = new Book
             {
@@ -22,12 +22,13 @@ namespace LibrarySystem.Service
                 Version = dto.Version,
                 AuthorId = dto.AuthorId,
                 CategoryId = dto.CategoryId,
-                CreatedBy = 1,
+                CreatedBy = 0,
                 CreatedDate = DateTime.Now
             };
-
+            
             await _bookRepo.AddAsync(book);
             await _bookRepo.SaveAsync();
+            return book.Id;
         }
 
         public async Task<List<BookListDto>> GetAllBooks()

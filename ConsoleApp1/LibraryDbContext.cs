@@ -6,9 +6,8 @@ namespace LibrarySystem.Data
     public class LibraryDbContext : DbContext
     {
         public LibraryDbContext() { }
+        public LibraryDbContext(DbContextOptions<LibraryDbContext> options) : base(options) { }
 
-        public LibraryDbContext(DbContextOptions<LibraryDbContext> options)
-            : base(options) { }
         public DbSet<Author> Authors { get; set; }
         public DbSet<Book> Books { get; set; }
         public DbSet<BookCopy> BookCopies { get; set; }
@@ -56,21 +55,44 @@ namespace LibrarySystem.Data
                 .HasOne(u => u.CreatedByUser)
                 .WithMany()
                 .HasForeignKey(u => u.CreatedBy)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.LastModifiedByUser)
                 .WithMany()
                 .HasForeignKey(u => u.LastModifiedBy)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.DeletedByUser)
                 .WithMany()
                 .HasForeignKey(u => u.DeletedBy)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<UserType>().HasData(
+                new UserType { Id = 1, TypeName = "Admin" },
+                new UserType { Id = 2, TypeName = "Librarian" },
+                new UserType { Id = 3, TypeName = "Member" });
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                 Id = 1,
+                 UserName = "admin",
+                 UserEmail = "admin@library.com",
+                 UserTypeId = 1,
+                 CreatedBy = null,
+                 CreatedDate = new DateTime(2025, 1, 1),
+                    LastModifiedBy = null,
+                 LastModifiedDate = null,
+                 DeletedBy = null,
+                 DeletedDate = null,
+                 IsDeleted = false
+                }
+            );   
+
+
         }
-          protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {

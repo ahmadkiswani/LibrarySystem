@@ -19,7 +19,7 @@ namespace LibrarySystem.Service
             {
                 BookId = dto.BookId,
                 IsAvailable = true,
-                CreatedBy = 1,
+                CreatedBy = 0,
                 CreatedDate = DateTime.Now
             };
 

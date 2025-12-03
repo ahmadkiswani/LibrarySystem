@@ -4,6 +4,7 @@ using LibrarySystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibrarySystem.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251203120309_AddUserAuditFK")]
+    partial class AddUserAuditFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -364,17 +367,6 @@ namespace LibrarySystem.Migrations
                     b.HasIndex("UserTypeId");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedDate = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsDeleted = false,
-                            UserEmail = "admin@library.com",
-                            UserName = "admin",
-                            UserTypeId = 1
-                        });
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.UserType", b =>
@@ -413,26 +405,6 @@ namespace LibrarySystem.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            IsDeleted = false,
-                            TypeName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            IsDeleted = false,
-                            TypeName = "Librarian"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            IsDeleted = false,
-                            TypeName = "Member"
-                        });
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.Book", b =>

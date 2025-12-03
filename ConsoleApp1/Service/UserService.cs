@@ -20,13 +20,19 @@ namespace LibrarySystem.Service
             {
                 UserName = dto.UserName,
                 UserEmail = dto.UserEmail,
-                CreatedBy = 1,
-                CreatedDate = DateTime.Now
+                CreatedBy = null,
+                CreatedDate = DateTime.Now,
+                LastModifiedBy = null,
+                LastModifiedDate = null,
+                DeletedBy = null,
+                DeletedDate = null,
+                IsDeleted = false
             };
 
             await _userRepo.AddAsync(user);
             await _userRepo.SaveAsync();
         }
+
 
         public async Task EditUser(int id, UserUpdateDto dto)
         {

@@ -4,6 +4,7 @@ using LibrarySystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibrarySystem.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251203111554_InitialClean")]
+    partial class InitialClean
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -350,89 +353,9 @@ namespace LibrarySystem.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("UserTypeId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("DeletedBy");
-
-                    b.HasIndex("LastModifiedBy");
-
-                    b.HasIndex("UserTypeId");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedDate = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsDeleted = false,
-                            UserEmail = "admin@library.com",
-                            UserName = "admin",
-                            UserTypeId = 1
-                        });
-                });
-
-            modelBuilder.Entity("LibrarySystem.Models.UserType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("LastModifiedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TypeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            IsDeleted = false,
-                            TypeName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            IsDeleted = false,
-                            TypeName = "Librarian"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            IsDeleted = false,
-                            TypeName = "Member"
-                        });
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.Book", b =>
@@ -490,36 +413,6 @@ namespace LibrarySystem.Migrations
                     b.Navigation("BookCopy");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("LibrarySystem.Models.User", b =>
-                {
-                    b.HasOne("LibrarySystem.Models.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("LibrarySystem.Models.User", "DeletedByUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("LibrarySystem.Models.User", "LastModifiedByUser")
-                        .WithMany()
-                        .HasForeignKey("LastModifiedBy")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("LibrarySystem.Models.UserType", "UserType")
-                        .WithMany()
-                        .HasForeignKey("UserTypeId");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("DeletedByUser");
-
-                    b.Navigation("LastModifiedByUser");
-
-                    b.Navigation("UserType");
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.Author", b =>

@@ -19,7 +19,7 @@ namespace LibrarySystem.Service
             var category = new Category
             {
                 Name = dto.Name,
-                CreatedBy = 1,
+                CreatedBy = 0,
                 CreatedDate = DateTime.Now
             };
 

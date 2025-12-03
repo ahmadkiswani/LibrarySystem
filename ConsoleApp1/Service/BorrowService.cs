@@ -41,7 +41,7 @@ namespace LibrarySystem.Service
                 BookCopyId = dto.BookCopyId,
                 BorrowDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(5),
-                CreatedBy = 1,
+                CreatedBy = 0,
                 CreatedDate = DateTime.Now
             };
 

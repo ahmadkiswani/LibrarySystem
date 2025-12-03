@@ -18,9 +18,10 @@ namespace LibrarySystemAPIs.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] BookCreateDto dto)
         {
-            await _service.AddBook(dto);
-            return Ok("Book added successfully");
+            var newBookId = await _service.AddBook(dto);
+            return Ok(newBookId);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
