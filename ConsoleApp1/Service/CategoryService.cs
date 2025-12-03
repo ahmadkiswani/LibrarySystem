@@ -1,24 +1,20 @@
-﻿using LibrarySystem.Data;
-using LibrarySystem.DTOs;
+﻿using LibrarySystem.DTOs;
 using LibrarySystem.DTOs.CategoryDtos;
 using LibrarySystem.Models;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using LibrarySystem.Repository;
 
 namespace LibrarySystem.Service
 {
     public class CategoryService
     {
-        private readonly LibraryDbContext _context;
+        private readonly IGenericRepository<Category> _categoryRepo;
 
-        public CategoryService(LibraryDbContext context)
+        public CategoryService(IGenericRepository<Category> categoryRepo)
         {
-            _context = context;
+            _categoryRepo = categoryRepo;
         }
 
-        public void AddCategory(CategoryCreateDto dto)
+        public async Task AddCategory(CategoryCreateDto dto)
         {
             var category = new Category
             {
@@ -27,86 +23,46 @@ namespace LibrarySystem.Service
                 CreatedDate = DateTime.Now
             };
 
-            _context.Categories.Add(category);
-            _context.SaveChanges();
+            await _categoryRepo.AddAsync(category);
+            await _categoryRepo.SaveAsync();
         }
 
-        public void DeleteCategory(int id)
+        public async Task EditCategory(int id, CategoryUpdateDto dto)
         {
-            var category = _context.Categories.FirstOrDefault(c => c.Id == id);
-
-            if (category == null)
-                throw new Exception("❗ Category not found");
-
-            category.IsDeleted = true;
-            category.DeletedBy = 1;
-            category.DeletedDate = DateTime.Now;
-
-            _context.SaveChanges();
-        }
-
-        public void EditCategory(int id, CategoryUpdateDto dto)
-        {
-            var category = _context.Categories.FirstOrDefault(c => c.Id == id && !c.IsDeleted);
-
-            if (category == null)
-                throw new Exception("❗ Category not found");
+            var category = await _categoryRepo.GetByIdAsync(id);
+            if (category == null || category.IsDeleted)
+                throw new Exception("Category not found");
 
             category.Name = dto.Name;
             category.LastModifiedBy = 1;
             category.LastModifiedDate = DateTime.Now;
 
-            _context.SaveChanges();
+            await _categoryRepo.Update(category);
+            await _categoryRepo.SaveAsync();
         }
 
-        public List<CategoryListDto> ListCategories()
+        public async Task DeleteCategory(int id)
         {
-            return _context.Categories
-                .Where(c => !c.IsDeleted)
-                .Select(c => new CategoryListDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .ToList();
-        }
-
-        public CategoryDetailsDto GetCategoryById(int id)
-        {
-            var category = _context.Categories
-                .Include(c => c.Books)
-                .FirstOrDefault(c => c.Id == id);
-
+            var category = await _categoryRepo.GetByIdAsync(id);
             if (category == null)
-                return null;
+                throw new Exception("Category not found");
 
-            return new CategoryDetailsDto
-            {
-                Id = category.Id,
-                Name = category.IsDeleted ? "Unknown" : category.Name,
-                BooksCount = category.Books.Count(b => !b.IsDeleted)
-            };
+            category.IsDeleted = true;
+            category.DeletedBy = 1;
+            category.DeletedDate = DateTime.Now;
+
+            await _categoryRepo.Update(category);
+            await _categoryRepo.SaveAsync();
         }
 
-        public List<CategoryListDto> Search(CategorySearchDto dto)
+        public async Task<List<CategoryListDto>> ListCategories()
         {
-            int page = dto.Page <= 0 ? 1 : dto.Page;
-            int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
-
-            return _context.Categories
-                .Where(c => !c.IsDeleted)
-                .Where(c =>
-                    (dto.Text == null || c.Name.ToLower().Contains(dto.Text.ToLower())) &&
-                    (dto.Number == null || c.Id == dto.Number)
-                )
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(c => new CategoryListDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .ToList();
+            var categories = await _categoryRepo.FindAsync(c => !c.IsDeleted);
+            return categories.Select(c => new CategoryListDto
+            {
+                Id = c.Id,
+                Name = c.Name
+            }).ToList();
         }
     }
 }

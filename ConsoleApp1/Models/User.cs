@@ -20,6 +20,9 @@ namespace LibrarySystem.Models
         public string UserEmail { get; set; }
         public int UserTypeId { get; set; }
         public UserType UserType { get; set; }
+        public User? CreatedByUser { get; set; }
+        public User? LastModifiedByUser { get; set; }
+        public User? DeletedByUser { get; set; }
 
         public ICollection<Borrow> Borrows { get; set; } = new List<Borrow>();
     }

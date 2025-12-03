@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySystem.DTOs.AvailableBookDto;
 using LibrarySystem.Service;
-using LibrarySystem.DTOs.AvailableBookDto;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystemAPIs.Controllers
 {
     [ApiController]
-    [Route("api/BookCopy")]
+    [Route("api/[controller]")]
     public class BookCopyController : ControllerBase
     {
         private readonly BookCopyService _service;
@@ -16,31 +16,24 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add([FromBody] BookCopyCreateDto dto)
+        public async Task<IActionResult> Add([FromBody] BookCopyCreateDto dto)
         {
             if (dto.BookId <= 0)
                 return BadRequest("Invalid Book ID");
 
-            try
-            {
-                _service.AddBookCopy(dto);
-                return Ok("Book copy added successfully");
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _service.AddBookCopy(dto);
+            return Ok("Book copy added successfully");
         }
 
         [HttpPut("Delete/{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (id <= 0)
                 return BadRequest("Invalid ID");
 
             try
             {
-                _service.DeleteBookCopy(id);
+                await _service.DeleteBookCopy(id);
                 return Ok("Book copy deleted successfully");
             }
             catch (Exception ex)
@@ -50,41 +43,17 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(_service.ListBookCopies());
-        }
-
-        [HttpGet("book/{bookId}")]
-        public IActionResult GetCopiesForBook(int bookId)
-        {
-            return Ok(_service.GetAllCopiesForBook(bookId));
-        }
-
-        [HttpGet("available/{bookId}")]
-        public IActionResult GetAvailable(int bookId)
-        {
-            return Ok(_service.GetAvailableCount(bookId));
-        }
-
-        [HttpGet("borrowed/{bookId}")]
-        public IActionResult GetBorrowed(int bookId)
-        {
-            return Ok(_service.GetBorrowedCount(bookId));
-        }
-
-        [HttpGet("total/{bookId}")]
-        public IActionResult GetTotal(int bookId)
-        {
-            return Ok(_service.GetTotalCopies(bookId));
+            return Ok(await _service.ListBookCopies());
         }
 
         [HttpGet("copy/{id}")]
-        public IActionResult GetSpecific(int id)
+        public async Task<IActionResult> GetSpecific(int id)
         {
             try
             {
-                return Ok(_service.GetSpecificCopy(id));
+                return Ok(await _service.GetSpecificCopy(id));
             }
             catch (Exception ex)
             {
@@ -92,5 +61,22 @@ namespace LibrarySystemAPIs.Controllers
             }
         }
 
+        [HttpGet("total/{bookId}")]
+        public async Task<IActionResult> GetTotal(int bookId)
+        {
+            return Ok(await _service.GetAllCopiesCount(bookId));
+        }
+
+        [HttpGet("available/{bookId}")]
+        public async Task<IActionResult> GetAvailable(int bookId)
+        {
+            return Ok(await _service.GetAvailableCount(bookId));
+        }
+
+        [HttpGet("borrowed/{bookId}")]
+        public async Task<IActionResult> GetBorrowed(int bookId)
+        {
+            return Ok(await _service.GetBorrowedCount(bookId));
+        }
     }
 }

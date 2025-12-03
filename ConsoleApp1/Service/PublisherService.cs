@@ -1,23 +1,20 @@
-﻿using LibrarySystem.Data;
-using LibrarySystem.DTOs;
+﻿using LibrarySystem.DTOs;
 using LibrarySystem.DTOs.PublisherDTOs;
 using LibrarySystem.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using LibrarySystem.Repository;
 
 namespace LibrarySystem.Service
 {
     public class PublisherService
     {
-        private readonly LibraryDbContext _context;
+        private readonly IGenericRepository<Publisher> _publisherRepo;
 
-        public PublisherService(LibraryDbContext context)
+        public PublisherService(IGenericRepository<Publisher> publisherRepo)
         {
-            _context = context;
+            _publisherRepo = publisherRepo;
         }
 
-        public void AddPublisher(PublisherCreateDto dto)
+        public async Task AddPublisher(PublisherCreateDto dto)
         {
             var publisher = new Publisher
             {
@@ -26,54 +23,27 @@ namespace LibrarySystem.Service
                 CreatedDate = DateTime.Now
             };
 
-            _context.Publishers.Add(publisher);
-            _context.SaveChanges();
+            await _publisherRepo.AddAsync(publisher);
+            await _publisherRepo.SaveAsync();
         }
 
-        public List<PublisherListDto> ListPublishers()
+        public async Task EditPublisher(int id, PublisherUpdateDto dto)
         {
-            return _context.Publishers
-                .Where(p => !p.IsDeleted)
-                .Select(p => new PublisherListDto
-                {
-                    Id = p.Id,
-                    Name = p.Name
-                })
-                .ToList();
-        }
-
-        public PublisherDetailsDto GetPublisherById(int id)
-        {
-            var publisher = _context.Publishers.FirstOrDefault(p => p.Id == id);
-
-            if (publisher == null)
-                return null;
-
-            return new PublisherDetailsDto
-            {
-                Id = publisher.Id,
-                Name = publisher.IsDeleted ? "Unknown" : publisher.Name
-            };
-        }
-
-        public void EditPublisher(int id, PublisherUpdateDto dto)
-        {
-            var publisher = _context.Publishers.FirstOrDefault(p => p.Id == id && !p.IsDeleted);
-
-            if (publisher == null)
+            var publisher = await _publisherRepo.GetByIdAsync(id);
+            if (publisher == null || publisher.IsDeleted)
                 throw new Exception("Publisher not found");
 
             publisher.Name = dto.Name;
             publisher.LastModifiedBy = 1;
             publisher.LastModifiedDate = DateTime.Now;
 
-            _context.SaveChanges();
+            await _publisherRepo.Update(publisher);
+            await _publisherRepo.SaveAsync();
         }
 
-        public void DeletePublisher(int id)
+        public async Task DeletePublisher(int id)
         {
-            var publisher = _context.Publishers.FirstOrDefault(p => p.Id == id);
-
+            var publisher = await _publisherRepo.GetByIdAsync(id);
             if (publisher == null)
                 throw new Exception("Publisher not found");
 
@@ -81,28 +51,18 @@ namespace LibrarySystem.Service
             publisher.DeletedBy = 1;
             publisher.DeletedDate = DateTime.Now;
 
-            _context.SaveChanges();
+            await _publisherRepo.Update(publisher);
+            await _publisherRepo.SaveAsync();
         }
 
-        public List<PublisherListDto> Search(PublisherSearchDto dto)
+        public async Task<List<PublisherListDto>> ListPublishers()
         {
-            int page = dto.Page <= 0 ? 1 : dto.Page;
-            int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
-
-            return _context.Publishers
-                .Where(p => !p.IsDeleted)
-                .Where(p =>
-                    (dto.Text == null || p.Name.ToLower().Contains(dto.Text.ToLower())) &&
-                    (dto.Number == null || p.Id == dto.Number)
-                )
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new PublisherListDto
-                {
-                    Id = p.Id,
-                    Name = p.Name
-                })
-                .ToList();
+            var publishers = await _publisherRepo.FindAsync(p => !p.IsDeleted);
+            return publishers.Select(p => new PublisherListDto
+            {
+                Id = p.Id,
+                Name = p.Name
+            }).ToList();
         }
     }
 }

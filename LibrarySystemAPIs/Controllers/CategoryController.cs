@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySystem.DTOs;
+using LibrarySystem.DTOs.CategoryDtos;
 using LibrarySystem.Service;
-using LibrarySystem.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystemAPIs.Controllers
 {
     [ApiController]
-    [Route("api/Category")]
+    [Route("api/[controller]")]
     public class CategoryController : ControllerBase
     {
         private readonly CategoryService _service;
@@ -16,57 +17,30 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add([FromBody] CategoryCreateDto dto)
+        public async Task<IActionResult> Add([FromBody] CategoryCreateDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Name))
-                return BadRequest("Name is required");
-
-            _service.AddCategory(dto);
+            await _service.AddCategory(dto);
             return Ok("Category added successfully");
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(_service.ListCategories());
-        }
-
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            try
-            {
-                var category = _service.GetCategoryById(id);
-                return Ok(category);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return Ok(await _service.ListCategories());
         }
 
         [HttpPut("Update/{id}")]
-        public IActionResult Edit(int id, [FromBody] CategoryUpdateDto dto)
+        public async Task<IActionResult> Edit(int id, [FromBody] CategoryUpdateDto dto)
         {
-            if (id <= 0)
-                return BadRequest("Invalid ID");
-
-            _service.EditCategory(id, dto);
+            await _service.EditCategory(id, dto);
             return Ok("Category updated successfully");
         }
 
         [HttpPut("Delete/{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                _service.DeleteCategory(id);
-                return Ok("Category deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _service.DeleteCategory(id);
+            return Ok("Category deleted successfully");
         }
     }
 }

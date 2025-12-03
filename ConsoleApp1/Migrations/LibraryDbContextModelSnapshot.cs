@@ -463,18 +463,18 @@ namespace LibrarySystem.Migrations
 
             modelBuilder.Entity("LibrarySystem.Models.User", b =>
                 {
-                    b.HasOne("LibrarySystem.Models.User", null)
+                    b.HasOne("LibrarySystem.Models.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LibrarySystem.Models.User", null)
+                    b.HasOne("LibrarySystem.Models.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("LibrarySystem.Models.User", null)
+                    b.HasOne("LibrarySystem.Models.User", "LastModifiedByUser")
                         .WithMany()
                         .HasForeignKey("LastModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -484,6 +484,12 @@ namespace LibrarySystem.Migrations
                         .HasForeignKey("UserTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("LastModifiedByUser");
 
                     b.Navigation("UserType");
                 });

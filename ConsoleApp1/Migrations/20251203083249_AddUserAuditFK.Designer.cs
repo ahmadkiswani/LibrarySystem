@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibrarySystem.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    [Migration("20251202131951_AuditUserFK")]
-    partial class AuditUserFK
+    [Migration("20251203083249_AddUserAuditFK")]
+    partial class AddUserAuditFK
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -466,18 +466,18 @@ namespace LibrarySystem.Migrations
 
             modelBuilder.Entity("LibrarySystem.Models.User", b =>
                 {
-                    b.HasOne("LibrarySystem.Models.User", null)
+                    b.HasOne("LibrarySystem.Models.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LibrarySystem.Models.User", null)
+                    b.HasOne("LibrarySystem.Models.User", "DeletedByUser")
                         .WithMany()
                         .HasForeignKey("DeletedBy")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("LibrarySystem.Models.User", null)
+                    b.HasOne("LibrarySystem.Models.User", "LastModifiedByUser")
                         .WithMany()
                         .HasForeignKey("LastModifiedBy")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -487,6 +487,12 @@ namespace LibrarySystem.Migrations
                         .HasForeignKey("UserTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DeletedByUser");
+
+                    b.Navigation("LastModifiedByUser");
 
                     b.Navigation("UserType");
                 });

@@ -4,8 +4,10 @@
 
 namespace LibrarySystem.Migrations
 {
-    public partial class AuditUserFK : Migration
+    /// <inheritdoc />
+    public partial class AddUserAuditFK : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(

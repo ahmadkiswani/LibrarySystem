@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySystem.DTOs.BookDtos;
 using LibrarySystem.Service;
-using LibrarySystem.DTOs.BookDtos;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystemAPIs.Controllers
 {
@@ -16,73 +16,43 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add([FromBody] BookCreateDto dto)
+        public async Task<IActionResult> Add([FromBody] BookCreateDto dto)
         {
-            if (dto == null)
-                return BadRequest("Request body is empty");
-
-            if (string.IsNullOrWhiteSpace(dto.Title))
-                return BadRequest("Title is required");
-
-            if (dto.AuthorId <= 0)
-                return BadRequest("Invalid AuthorId");
-
-            if (dto.CategoryId <= 0)
-                return BadRequest("Invalid CategoryId");
-
-            _service.AddBook(dto);
+            await _service.AddBook(dto);
             return Ok("Book added successfully");
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(_service.GetAllBooks());
+            return Ok(await _service.GetAllBooks());
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
-                return Ok(_service.GetBookById(id));
+                return Ok(await _service.GetBookById(id));
             }
             catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
-
         }
 
         [HttpPut("Update/{id}")]
-        public IActionResult Edit(int id, [FromBody] BookUpdateDto dto)
+        public async Task<IActionResult> Edit(int id, [FromBody] BookUpdateDto dto)
         {
-            if (id <= 0)
-                return BadRequest("Invalid ID");
-
-            _service.EditBook(id, dto);
+            await _service.EditBook(id, dto);
             return Ok("Book updated successfully");
         }
 
         [HttpPut("Delete/{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                _service.DeleteBook(id);
-                return Ok("Book deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-
-        [HttpGet("search")]
-        public IActionResult Search([FromQuery] BookSearchDto dto)
-        {
-            var result = _service.Search(dto);
-            return Ok(result);
+            await _service.DeleteBook(id);
+            return Ok("Book deleted successfully");
         }
     }
 }

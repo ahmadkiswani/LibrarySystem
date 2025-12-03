@@ -17,28 +17,27 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add([FromBody] AuthorCreateDto dto)
+        public async Task<IActionResult> Add([FromBody] AuthorCreateDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.AuthorName))
                 return BadRequest("AuthorName is required");
 
-            _service.AddAuthor(dto);
+            await _service.AddAuthor(dto);
             return Ok("Author added successfully");
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(_service.GetAllAuthors());
+            return Ok(await _service.GetAllAuthors());
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
-                var result = _service.GetAuthorById(id);
-                return Ok(result);
+                return Ok(await _service.GetAuthorById(id));
             }
             catch (Exception ex)
             {
@@ -47,14 +46,14 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Edit(int id, [FromBody] AuthorUpdateDto dto)
+        public async Task<IActionResult> Edit(int id, [FromBody] AuthorUpdateDto dto)
         {
             if (id <= 0)
                 return BadRequest("Invalid ID");
 
             try
             {
-                _service.EditAuthor(id, dto);
+                await _service.EditAuthor(id, dto);
                 return Ok("Author updated successfully");
             }
             catch (Exception ex)
@@ -64,11 +63,11 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPut("Delete/{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                _service.DeleteAuthor(id);
+                await _service.DeleteAuthor(id);
                 return Ok("Author deleted successfully");
             }
             catch (Exception ex)

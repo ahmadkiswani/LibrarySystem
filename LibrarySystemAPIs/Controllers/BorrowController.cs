@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySystem.DTOs.BorrowDTOs;
 using LibrarySystem.Service;
-using LibrarySystem.DTOs.BorrowDTOs;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystemAPIs.Controllers
 {
     [ApiController]
-    [Route("api/Borrow")]
+    [Route("api/[controller]")]
     public class BorrowController : ControllerBase
     {
         private readonly BorrowService _service;
@@ -16,17 +16,11 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPost("Take")]
-        public IActionResult BorrowBook([FromBody] BorrowCreateDto dto)
+        public async Task<IActionResult> BorrowBook([FromBody] BorrowCreateDto dto)
         {
-            if (dto.Id <= 0)
-                return BadRequest("Invalid User ID");
-
-            if (dto.BookCopyId <= 0)
-                return BadRequest("Invalid BookCopy ID");
-
             try
             {
-                _service.BorrowBook(dto);
+                await _service.BorrowBook(dto);
                 return Ok("Book borrowed successfully");
             }
             catch (Exception ex)
@@ -36,32 +30,12 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPost("Return")]
-        public IActionResult ReturnBook([FromBody] BorrowReturnDto dto)
+        public async Task<IActionResult> ReturnBook([FromBody] BorrowReturnDto dto)
         {
-            if (dto.Id <= 0)
-                return BadRequest("Invalid borrow ID");
             try
             {
-                _service.ReturnBook(dto);
+                await _service.ReturnBook(dto);
                 return Ok("Book returned successfully");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("User/{userId}")]
-        public IActionResult GetUserBorrowed(int userId)
-        {
-            try
-            {
-                var result = _service.GetBorrowedBooksByUser(userId);
-
-                if (result == null || result.Count == 0)
-                    return NotFound("User has no borrowed books");
-
-                return Ok(result);
             }
             catch (Exception ex)
             {

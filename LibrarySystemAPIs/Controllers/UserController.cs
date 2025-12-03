@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySystem.DTOs.UserDtos;
 using LibrarySystem.Service;
-using LibrarySystem.DTOs.UserDtos;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystemAPIs.Controllers
 {
     [ApiController]
-    [Route("api/User")]
+    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
         private readonly UserService _service;
@@ -14,54 +14,32 @@ namespace LibrarySystemAPIs.Controllers
         {
             _service = service;
         }
+
         [HttpPost]
-        public IActionResult Add([FromBody] UserCreateDto dto)
+        public async Task<IActionResult> Add([FromBody] UserCreateDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.UserName))
-                return BadRequest("Username is required");  
-            if (string.IsNullOrWhiteSpace(dto.UserEmail))
-                return BadRequest("Email is required");
-            _service.AddUser(dto);
+            await _service.AddUser(dto);
             return Ok("User added successfully");
         }
+
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(_service.ListUsers());
+            return Ok(await _service.ListUsers());
         }
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            var result = _service.GetUserById(id);
-            try
-            {
-                return Ok(_service.GetUserById(id));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+
         [HttpPut("Update/{id}")]
-        public IActionResult Edit(int id, [FromBody] UserUpdateDto dto)
+        public async Task<IActionResult> Edit(int id, [FromBody] UserUpdateDto dto)
         {
-            if (id <= 0)
-                return BadRequest("Invalid ID");
-            _service.EditUser(id, dto);
+            await _service.EditUser(id, dto);
             return Ok("User updated successfully");
         }
+
         [HttpPut("Delete/{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                _service.DeleteUser(id);
-                return Ok("User deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _service.DeleteUser(id);
+            return Ok("User deleted successfully");
         }
     }
 }

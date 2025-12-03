@@ -9,7 +9,6 @@ namespace LibrarySystem.Data
 
         public LibraryDbContext(DbContextOptions<LibraryDbContext> options)
             : base(options) { }
-
         public DbSet<Author> Authors { get; set; }
         public DbSet<Book> Books { get; set; }
         public DbSet<BookCopy> BookCopies { get; set; }
@@ -22,8 +21,6 @@ namespace LibrarySystem.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Ignore<AuditLog>();
 
             modelBuilder.Entity<Book>()
                 .HasOne(b => b.Author)
@@ -56,27 +53,24 @@ namespace LibrarySystem.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
-                .HasOne<User>()
+                .HasOne(u => u.CreatedByUser)
                 .WithMany()
                 .HasForeignKey(u => u.CreatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
-                .HasOne<User>()
+                .HasOne(u => u.LastModifiedByUser)
                 .WithMany()
                 .HasForeignKey(u => u.LastModifiedBy)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
-                .HasOne<User>()
+                .HasOne(u => u.DeletedByUser)
                 .WithMany()
                 .HasForeignKey(u => u.DeletedBy)
                 .OnDelete(DeleteBehavior.Restrict);
         }
-
-        
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+          protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {

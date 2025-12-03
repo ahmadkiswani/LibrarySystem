@@ -1,115 +1,86 @@
-﻿using LibrarySystem.DTOs;
-using LibrarySystem.DTOs.AvailableBookDto;
+﻿using LibrarySystem.DTOs.AvailableBookDto;
 using LibrarySystem.Models;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using LibrarySystem.Data;
+using LibrarySystem.Repository;
 
 namespace LibrarySystem.Service
 {
     public class BookCopyService
     {
+        private readonly IGenericRepository<BookCopy> _copyRepo;
 
-        private readonly LibraryDbContext _context;
-
-        public BookCopyService(LibraryDbContext context)
+        public BookCopyService(IGenericRepository<BookCopy> copyRepo)
         {
-            _context = context;
+            _copyRepo = copyRepo;
         }
-        public void AddBookCopy(BookCopyCreateDto dto)
+
+        public async Task AddBookCopy(BookCopyCreateDto dto)
         {
-            var book = _context.Books.FirstOrDefault(b => b.Id == dto.BookId && !b.IsDeleted);
-
-            if (book == null)
-                throw new Exception($"❗ Book with Id {dto.BookId} does NOT exist");
-
             var copy = new BookCopy
             {
                 BookId = dto.BookId,
+                IsAvailable = true,
                 CreatedBy = 1,
                 CreatedDate = DateTime.Now
             };
 
-            _context.BookCopies.Add(copy);
-            _context.SaveChanges();
+            await _copyRepo.AddAsync(copy);
+            await _copyRepo.SaveAsync();
         }
 
-
-
-        public void DeleteBookCopy(int id)
+        public async Task DeleteBookCopy(int id)
         {
-            var copy = _context.BookCopies
-             .Include(c => c.BorrowRecords)
-             .FirstOrDefault(x => x.Id == id && !x.IsDeleted); 
-            if (copy == null)
+            var copy = await _copyRepo.GetByIdAsync(id);
+
+            if (copy == null || copy.IsDeleted)
                 throw new Exception("Copy not found");
 
-            bool isBorrowedActive = copy.BorrowRecords.Any(b => b.ReturnDate == null);
-            if (isBorrowedActive)
-                throw new Exception($"Cannot delete copy {id} — it is currently borrowed");
             copy.IsDeleted = true;
             copy.IsAvailable = false;
-            copy.LastModifiedBy = 0;
+            copy.LastModifiedBy = 1;
             copy.LastModifiedDate = DateTime.Now;
 
-            Console.WriteLine($"Copy {id} marked as deleted (soft delete)");
+            await _copyRepo.Update(copy);
+            await _copyRepo.SaveAsync();
         }
 
-        public List<BookCopyListDto> ListBookCopies()
+        public async Task<List<BookCopyListDto>> ListBookCopies()
         {
-            return _context.BookCopies
-             .Where(copy => !copy.IsDeleted)
-             .Select(copy => new BookCopyListDto
-             {
-                 Id = copy.Id,
-                 BookId = copy.BookId,
-                 IsAvailable = copy.IsAvailable
-             }).ToList();
+            var copies = await _copyRepo.FindAsync(c => !c.IsDeleted);
 
-        }
-
-        public int GetAvailableCount(int bookId)
-        {
-            return _context.BookCopies.Count(x => x.BookId == bookId && x.IsAvailable && !x.IsDeleted);
-
-        }
-
-        public int GetBorrowedCount(int bookId)
+            return copies.Select(c => new BookCopyListDto
             {
-            return _context.BookCopies.Count(x => x.BookId == bookId && !x.IsAvailable && !x.IsDeleted);
-            }
-
-        public List<BookCopy> GetAllCopiesForBook(int bookId)
-        {
-            return _context.BookCopies.Where(x => x.BookId == bookId && !x.IsDeleted).ToList();
+                Id = c.Id,
+                BookId = c.BookId,
+                IsAvailable = c.IsAvailable
+            }).ToList();
         }
 
-        public BookCopy GetSpecificCopy(int availableBookId)
+        public async Task<BookCopy> GetSpecificCopy(int id)
         {
-            var copy= _context.BookCopies.FirstOrDefault(x => x.Id == availableBookId && !x.IsDeleted);
+            var copy = await _copyRepo.GetByIdAsync(id);
 
-            if (copy == null)
+            if (copy == null || copy.IsDeleted)
                 throw new Exception("Copy not found");
 
             return copy;
-
-        }
-        public int GetTotalCopies(int bookId)
-        {
-            return _context.BookCopies.Count(x => x.BookId == bookId && !x.IsDeleted);
-        }   
-
-        public int GetAvailableCopies(int bookId)
-        {
-            return _context.BookCopies.Count(x => x.BookId == bookId && x.IsAvailable && !x.IsDeleted);
         }
 
-        public int GetBorrowedCopies(int bookId)
+        public async Task<int> GetAllCopiesCount(int bookId)
         {
-            return _context.BookCopies.Count(x => x.BookId == bookId && !x.IsAvailable && !x.IsDeleted);
+            var copies = await _copyRepo.FindAsync(c => c.BookId == bookId && !c.IsDeleted);
+            return copies.Count();
         }
 
+        public async Task<int> GetAvailableCount(int bookId)
+        {
+            var copies = await _copyRepo.FindAsync(c => c.BookId == bookId && !c.IsDeleted && c.IsAvailable);
+            return copies.Count();
+        }
+
+        public async Task<int> GetBorrowedCount(int bookId)
+        {
+            var copies = await _copyRepo.FindAsync(c => c.BookId == bookId && !c.IsDeleted && !c.IsAvailable);
+            return copies.Count();
+        }
     }
 }
