@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibrarySystem.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -14,8 +15,11 @@ namespace LibrarySystem.DTOs.UserDtos
         [Required]
         [EmailAddress]
         [StringLength(120)]
-        public string UserEmail { get; set; } = string.Empty;   
+        public string UserEmail { get; set; } = string.Empty;
+        public User CreatedByUser { get; set; }
+        public User LastModifiedByUser { get; set; }
+        public User DeletedByUser { get; set; }
 
-        
+
     }
 }
