@@ -100,6 +100,9 @@ namespace LibrarySystem.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("PublisherId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -119,6 +122,8 @@ namespace LibrarySystem.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("PublisherId");
+
                     b.ToTable("Books");
                 });
 
@@ -130,7 +135,13 @@ namespace LibrarySystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
                     b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("CopyCode")
@@ -167,7 +178,11 @@ namespace LibrarySystem.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AuthorId");
+
                     b.HasIndex("BookId");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("PublisherId");
 
@@ -449,17 +464,37 @@ namespace LibrarySystem.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LibrarySystem.Models.Publisher", "Publisher")
+                        .WithMany()
+                        .HasForeignKey("PublisherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Author");
 
                     b.Navigation("Category");
+
+                    b.Navigation("Publisher");
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.BookCopy", b =>
                 {
+                    b.HasOne("LibrarySystem.Models.Author", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("LibrarySystem.Models.Book", "Book")
                         .WithMany("Copies")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("LibrarySystem.Models.Publisher", "Publisher")
@@ -468,7 +503,11 @@ namespace LibrarySystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Author");
+
                     b.Navigation("Book");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Publisher");
                 });

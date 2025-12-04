@@ -22,8 +22,10 @@ namespace LibrarySystem.DTOs.BookDtos
 
         [Required]
         public int CategoryId { get; set; }
+        [Required]
+        public int PublisherId { get; set; }
 
-        
+        public int CreatedBy { get; set; } = 1;
     }
 
 }

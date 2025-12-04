@@ -7,15 +7,14 @@ namespace LibrarySystem.DTOs.BorrowDTOs
 {
     public class BorrowCreateDto
     {
-        [Required]  
-        public int Id { get; set; }
+        [Required]
+        public int UserId { get; set; }
+
         [Required]
         public int BookCopyId { get; set; }
-        
-      
-
-
     }
 
-
 }
+
+
+

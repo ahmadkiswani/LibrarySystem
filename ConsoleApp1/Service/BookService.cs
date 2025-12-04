@@ -22,6 +22,7 @@ namespace LibrarySystem.Service
                 Version = dto.Version,
                 AuthorId = dto.AuthorId,
                 CategoryId = dto.CategoryId,
+                PublisherId = dto.PublisherId,
                 CreatedBy = 0,
                 CreatedDate = DateTime.Now
             };

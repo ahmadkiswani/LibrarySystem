@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibrarySystem.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    [Migration("20251203120309_AddUserAuditFK")]
-    partial class AddUserAuditFK
+    [Migration("20251204070435_FixPublisherId")]
+    partial class FixPublisherId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,6 +103,9 @@ namespace LibrarySystem.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("PublisherId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -122,6 +125,8 @@ namespace LibrarySystem.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("PublisherId");
+
                     b.ToTable("Books");
                 });
 
@@ -133,7 +138,13 @@ namespace LibrarySystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
                     b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("CopyCode")
@@ -170,7 +181,11 @@ namespace LibrarySystem.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AuthorId");
+
                     b.HasIndex("BookId");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("PublisherId");
 
@@ -367,6 +382,17 @@ namespace LibrarySystem.Migrations
                     b.HasIndex("UserTypeId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedDate = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            UserEmail = "admin@library.com",
+                            UserName = "admin",
+                            UserTypeId = 1
+                        });
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.UserType", b =>
@@ -405,6 +431,26 @@ namespace LibrarySystem.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsDeleted = false,
+                            TypeName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsDeleted = false,
+                            TypeName = "Librarian"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IsDeleted = false,
+                            TypeName = "Member"
+                        });
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.Book", b =>
@@ -421,17 +467,37 @@ namespace LibrarySystem.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LibrarySystem.Models.Publisher", "Publisher")
+                        .WithMany()
+                        .HasForeignKey("PublisherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Author");
 
                     b.Navigation("Category");
+
+                    b.Navigation("Publisher");
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.BookCopy", b =>
                 {
+                    b.HasOne("LibrarySystem.Models.Author", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("LibrarySystem.Models.Book", "Book")
                         .WithMany("Copies")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("LibrarySystem.Models.Publisher", "Publisher")
@@ -440,7 +506,11 @@ namespace LibrarySystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Author");
+
                     b.Navigation("Book");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Publisher");
                 });

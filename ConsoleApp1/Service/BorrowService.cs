@@ -19,29 +19,32 @@ namespace LibrarySystem.Service
             _copyRepo = copyRepo;
             _userRepo = userRepo;
         }
-
         public async Task BorrowBook(BorrowCreateDto dto)
         {
             var copy = await _copyRepo.GetByIdAsync(dto.BookCopyId);
-            if (copy == null || copy.IsDeleted || !copy.IsAvailable)
+            if (copy == null || copy.IsDeleted)
+                throw new Exception("Copy not found");
+
+            if (!copy.IsAvailable)
                 throw new Exception("Copy not available");
 
-            var user = await _userRepo.GetByIdAsync(dto.Id);
+            var user = await _userRepo.GetByIdAsync(dto.UserId);
             if (user == null || user.IsDeleted)
                 throw new Exception("User not found");
 
             copy.IsAvailable = false;
             copy.LastModifiedDate = DateTime.Now;
-            copy.LastModifiedBy = dto.Id;
+            copy.LastModifiedBy = dto.UserId;
+
             await _copyRepo.Update(copy);
 
             var borrow = new Borrow
             {
-                UserId = dto.Id,
+                UserId = dto.UserId,
                 BookCopyId = dto.BookCopyId,
                 BorrowDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(5),
-                CreatedBy = 0,
+                CreatedBy = dto.UserId,
                 CreatedDate = DateTime.Now
             };
 
@@ -49,8 +52,10 @@ namespace LibrarySystem.Service
             await _borrowRepo.SaveAsync();
         }
 
+ 
         public async Task ReturnBook(BorrowReturnDto dto)
         {
+          
             var borrow = await _borrowRepo.GetByIdAsync(dto.Id);
             if (borrow == null)
                 throw new Exception("Borrow record not found");
@@ -61,6 +66,7 @@ namespace LibrarySystem.Service
             borrow.ReturnDate = DateTime.Now;
             borrow.LastModifiedBy = 1;
             borrow.LastModifiedDate = DateTime.Now;
+
             await _borrowRepo.Update(borrow);
 
             var copy = await _copyRepo.GetByIdAsync(borrow.BookCopyId);
