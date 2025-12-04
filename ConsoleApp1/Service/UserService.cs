@@ -20,10 +20,11 @@ namespace LibrarySystem.Service
             {
                 UserName = dto.UserName,
                 UserEmail = dto.UserEmail,
-                CreatedBy = dto.CreatedByUser.Id, 
+                CreatedBy = dto.CreatedBy,
                 CreatedDate = DateTime.Now,
                 IsDeleted = false
             };
+
             await _userRepo.AddAsync(user);
             await _userRepo.SaveAsync();
         }
@@ -36,27 +37,31 @@ namespace LibrarySystem.Service
 
             user.UserName = dto.UserName;
             user.UserEmail = dto.UserEmail;
-            user.LastModifiedBy = dto.LastModifiedByUser.Id;
+            user.LastModifiedBy = dto.LastModifiedBy;
             user.LastModifiedDate = DateTime.Now;
 
             await _userRepo.Update(user);
             await _userRepo.SaveAsync();
         }
-        public async Task DeleteUser(int id, UserUpdateDto dto)
+
+        public async Task DeleteUser(int id, UserDeleteDto dto)
         {
             var user = await _userRepo.GetByIdAsync(id);
-            if (user == null)
+            if (user == null || user.IsDeleted)
                 throw new Exception("User not found");
+
             user.IsDeleted = true;
-            user.DeletedBy =dto.DeletedByUser.Id;
+            user.DeletedBy = dto.UserDelete;
             user.DeletedDate = DateTime.Now;
 
             await _userRepo.Update(user);
             await _userRepo.SaveAsync();
         }
+
         public async Task<List<UserListDto>> ListUsers()
         {
             var users = await _userRepo.FindAsync(u => !u.IsDeleted);
+
             return users.Select(u => new UserListDto
             {
                 Id = u.Id,

@@ -2,44 +2,44 @@
 using LibrarySystem.Service;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LibrarySystemAPIs.Controllers
-{
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    namespace LibrarySystemAPIs.Controllers
     {
-        private readonly UserService _service;
-
-        public UserController(UserService service)
+        [ApiController]
+        [Route("api/[controller]")]
+        public class UserController : ControllerBase
         {
-            _service = service;
-        }
+            private readonly UserService _service;
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] UserCreateDto dto)
-        {
-            await _service.AddUser(dto);
-            return Ok("User added successfully");
-        }
+            public UserController(UserService service)
+            {
+                _service = service;
+            }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            return Ok(await _service.ListUsers());
-        }
+            [HttpPost]
+            public async Task<IActionResult> Add([FromBody] UserCreateDto dto)
+            {
+                await _service.AddUser(dto);
+                return Ok("User added successfully");
+            }
 
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> Edit(int id, [FromBody] UserUpdateDto dto)
-        {
-            await _service.EditUser(id, dto);
-            return Ok("User updated successfully");
-        }
+            [HttpGet]
+            public async Task<IActionResult> GetAll()
+            {
+                return Ok(await _service.ListUsers());
+            }
 
-        [HttpPut("Delete/{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _service.DeleteUser(id);
-            return Ok("User deleted successfully");
+            [HttpPut("Update/{id}")]
+            public async Task<IActionResult> Edit(int id, [FromBody] UserUpdateDto dto)
+            {
+                await _service.EditUser(id, dto);
+                return Ok("User updated successfully");
+            }
+
+            [HttpPut("Delete/{id}")]
+            public async Task<IActionResult> Delete(int id, [FromBody] UserDeleteDto dto)
+            {
+                await _service.DeleteUser(id, dto);
+                return Ok("User deleted successfully");
+            }
         }
     }
-}

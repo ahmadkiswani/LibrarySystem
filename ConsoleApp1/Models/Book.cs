@@ -21,6 +21,8 @@ namespace LibrarySystem.Models
         public Author Author { get; set; }
         public int CategoryId { get; set; }
         public Category Category { get; set; }
+        public int PublisherId { get; set; }
+        public Publisher? Publisher { get; set; }
         public bool IsDeleted { get; set; } = false;
         public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
  }

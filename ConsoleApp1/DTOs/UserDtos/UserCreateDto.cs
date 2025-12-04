@@ -10,16 +10,16 @@ namespace LibrarySystem.DTOs.UserDtos
     {
         [Required]
         [StringLength(40)]
-        public  string UserName { get; set; } 
+        public string UserName { get; set; }
 
         [Required]
         [EmailAddress]
         [StringLength(120)]
-        public string UserEmail { get; set; } = string.Empty;
-        public User CreatedByUser { get; set; }
-        public User LastModifiedByUser { get; set; }
-        public User DeletedByUser { get; set; }
+        public string UserEmail { get; set; }
 
-
+        
+        [Required]
+        public int CreatedBy { get; set; }
     }
 }
+

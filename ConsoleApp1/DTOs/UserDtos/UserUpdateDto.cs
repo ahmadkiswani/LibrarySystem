@@ -8,8 +8,6 @@ namespace LibrarySystem.DTOs.UserDtos
 {
     public class UserUpdateDto
     {
-      
-        public int Id { get;set; }  
         [Required]
         [StringLength(40)]
         public string UserName { get; set; }
@@ -18,8 +16,9 @@ namespace LibrarySystem.DTOs.UserDtos
         [EmailAddress]
         [StringLength(120)]
         public string UserEmail { get; set; }
-        public User? CreatedByUser { get; set; }
-        public User? LastModifiedByUser { get; set; }
-        public User? DeletedByUser { get; set; }
+
+        [Required]
+        public int LastModifiedBy { get; set; }
     }
+
 }
