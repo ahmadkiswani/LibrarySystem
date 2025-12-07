@@ -20,6 +20,7 @@ namespace LibrarySystem.Shared.DTOs.UserDtos
         public string UserEmail { get; set; } = string.Empty;
 
         public int LastModifiedBy { get; set; } = 1;
+        public int? UserTypeId { get; set; }
     }
 
 }

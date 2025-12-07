@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Services
 {
-    public class BookService: IBookService
+    public class BookService : IBookService
     {
         private readonly IGenericRepository<Book> _bookRepo;
         private readonly IGenericRepository<BookCopy> _copyRepo;
@@ -21,18 +21,16 @@ namespace LibrarySystem.Services
             _copyRepo = copyRepo;
             _borrowRepo = borrowRepo;
         }
+
         public async Task<int> AddBook(BookCreateDto dto)
         {
             var book = new Book
             {
                 Title = dto.Title,
-                PublishDate = dto.PublishDate,
                 Version = dto.Version,
                 AuthorId = dto.AuthorId,
                 CategoryId = dto.CategoryId,
-                PublisherId = dto.PublisherId,
-                CreatedBy = 0,
-                CreatedDate = DateTime.Now
+                PublisherId = dto.PublisherId
             };
 
             await _bookRepo.AddAsync(book);
@@ -40,18 +38,18 @@ namespace LibrarySystem.Services
             return book.Id;
         }
 
-      
         public async Task<List<BookListDto>> GetAllBooks()
         {
             var books = await _bookRepo.FindAsync(b => !b.IsDeleted);
 
-            return books.Select(b => new BookListDto
-            {
-                Id = b.Id,
-                Title = b.Title
-            }).ToList();
+            return books
+                .Select(b => new BookListDto
+                {
+                    Id = b.Id,
+                    Title = b.Title
+                })
+                .ToList();
         }
-
 
         public async Task<BookDetailsDto> GetBookById(int id)
         {
@@ -67,6 +65,7 @@ namespace LibrarySystem.Services
                 throw new Exception("Book not found");
 
             var copies = await _copyRepo.FindAsync(c => c.BookId == id && !c.IsDeleted);
+
             int available = copies.Count(c => c.IsAvailable);
             int borrowed = copies.Count(c => !c.IsAvailable);
 
@@ -108,23 +107,18 @@ namespace LibrarySystem.Services
             book.AuthorId = dto.AuthorId;
             book.CategoryId = dto.CategoryId;
             book.PublisherId = dto.PublisherId;
-            book.LastModifiedBy = 1;
-            book.LastModifiedDate = DateTime.Now;
 
-            await _bookRepo.Update(book);
+            await _bookRepo.UpdateAsync(book);
             await _bookRepo.SaveAsync();
         }
+
         public async Task DeleteBook(int id)
         {
             var book = await _bookRepo.GetByIdAsync(id);
             if (book == null)
                 throw new Exception("Book not found");
 
-            book.IsDeleted = true;
-            book.DeletedBy = 1;
-            book.DeletedDate = DateTime.Now;
-
-            await _bookRepo.Update(book);
+            await _bookRepo.SoftDeleteAsync(book);
             await _bookRepo.SaveAsync();
         }
     }

@@ -1,12 +1,11 @@
-﻿using LibrarySystem.Entities.Models;
-using LibrarySystem.Domain.Data;
-using LibrarySystem.Domain.Repositories;
-using LibrarySystem.Shared.DTOs;
+﻿using LibrarySystem.Domain.Repositories;
+using LibrarySystem.Entities.Models;
 using LibrarySystem.Services.Interfaces;
-using LibrarySystem.Shared.DTOs.CategoryDtos;
+using LibrarySystem.Shared.DTOs;
+
 namespace LibrarySystem.Services
 {
-    public class CategoryService: ICategoryService  
+    public class CategoryService : ICategoryService
     {
         private readonly IGenericRepository<Category> _categoryRepo;
 
@@ -19,9 +18,7 @@ namespace LibrarySystem.Services
         {
             var category = new Category
             {
-                Name = dto.Name,
-                CreatedBy = 0,
-                CreatedDate = DateTime.Now
+                Name = dto.Name
             };
 
             await _categoryRepo.AddAsync(category);
@@ -35,10 +32,8 @@ namespace LibrarySystem.Services
                 throw new Exception("Category not found");
 
             category.Name = dto.Name;
-            category.LastModifiedBy = 1;
-            category.LastModifiedDate = DateTime.Now;
 
-            await _categoryRepo.Update(category);
+            await _categoryRepo.UpdateAsync(category);
             await _categoryRepo.SaveAsync();
         }
 
@@ -48,17 +43,14 @@ namespace LibrarySystem.Services
             if (category == null)
                 throw new Exception("Category not found");
 
-            category.IsDeleted = true;
-            category.DeletedBy = 1;
-            category.DeletedDate = DateTime.Now;
-
-            await _categoryRepo.Update(category);
+            await _categoryRepo.SoftDeleteAsync(category);
             await _categoryRepo.SaveAsync();
         }
 
         public async Task<List<CategoryListDto>> ListCategories()
         {
             var categories = await _categoryRepo.FindAsync(c => !c.IsDeleted);
+
             return categories.Select(c => new CategoryListDto
             {
                 Id = c.Id,

@@ -2,11 +2,11 @@
 using LibrarySystem.Entities.Models;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.AvailableBookDto;
-
+using LibrarySystem.Shared.DTOs.BookDtos;
 
 namespace LibrarySystem.Services
 {
-    public class BookCopyService: IBookCopyService
+    public class BookCopyService : IBookCopyService
     {
         private readonly IGenericRepository<BookCopy> _copyRepo;
         private readonly IGenericRepository<Book> _bookRepo;
@@ -18,6 +18,7 @@ namespace LibrarySystem.Services
             _copyRepo = copyRepo;
             _bookRepo = bookRepo;
         }
+
         public async Task AddBookCopy(BookCopyCreateDto dto)
         {
             var book = await _bookRepo.GetByIdAsync(dto.BookId);
@@ -31,33 +32,27 @@ namespace LibrarySystem.Services
                 AuthorId = book.AuthorId,
                 CategoryId = book.CategoryId,
                 PublisherId = book.PublisherId,
-                IsAvailable = true,
-                CreatedBy = 1,  
-                CreatedDate = DateTime.Now
+                CopyCode = Guid.NewGuid().ToString().Substring(0, 8)
             };
 
             await _copyRepo.AddAsync(copy);
+
             book.TotalCopies += 1;
-            await _bookRepo.Update(book);
+            await _bookRepo.UpdateAsync(book);
+
             await _copyRepo.SaveAsync();
         }
+
         public async Task DeleteBookCopy(int id)
         {
             var copy = await _copyRepo.GetByIdAsync(id);
 
-            if (copy == null || copy.IsDeleted)
+            if (copy == null)
                 throw new Exception("Copy not found");
 
-            copy.IsDeleted = true;
-            copy.IsAvailable = false;
-            copy.LastModifiedBy = 1;
-            copy.LastModifiedDate = DateTime.Now;
-
-            await _copyRepo.Update(copy);
+            await _copyRepo.SoftDeleteAsync(copy);
             await _copyRepo.SaveAsync();
         }
-
-
 
         public async Task<List<BookCopyListDto>> ListBookCopies()
         {
@@ -71,19 +66,14 @@ namespace LibrarySystem.Services
             }).ToList();
         }
 
-
-
         public async Task<BookCopy> GetSpecificCopy(int id)
         {
             var copy = await _copyRepo.GetByIdAsync(id);
-
             if (copy == null || copy.IsDeleted)
                 throw new Exception("Copy not found");
 
             return copy;
         }
-
-
 
         public async Task<int> GetAllCopiesCount(int bookId)
         {

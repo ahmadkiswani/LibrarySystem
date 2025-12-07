@@ -15,6 +15,5 @@ namespace LibrarySystem.Entities.Models
         public string AuthorName { get; set; } = string.Empty;
 
         public ICollection<Book> Books { get; set; } = new List<Book>();
-        public bool IsDeleted { get; set; } = false; 
     }
 }

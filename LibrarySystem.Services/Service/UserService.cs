@@ -1,16 +1,12 @@
-﻿using LibrarySystem.Entities.Models;
-using LibrarySystem.Domain.Data;
-using LibrarySystem.Domain.Repositories;
-using LibrarySystem.Shared.DTOs.AuthorDtos;
-using LibrarySystem.Shared.DTOs.BookDtos;
-using LibrarySystem.Shared.DTOs.UserDtos;
+﻿using LibrarySystem.Domain.Repositories;
+using LibrarySystem.Entities.Models;
 using LibrarySystem.Services.Interfaces;
+using LibrarySystem.Shared.DTOs.UserDtos;
 using LibrarySystem.Shared.DTOs.UserDtos.LibrarySystem.Shared.DTOs;
-
 
 namespace LibrarySystem.Services
 {
-    public class UserService: IUserService  
+    public class UserService : IUserService
     {
         private readonly IGenericRepository<User> _userRepo;
 
@@ -25,9 +21,7 @@ namespace LibrarySystem.Services
             {
                 UserName = dto.UserName,
                 UserEmail = dto.UserEmail,
-                CreatedBy = dto.CreatedBy,
-                CreatedDate = DateTime.Now,
-                IsDeleted = false
+                UserTypeId = dto.UserTypeId
             };
 
             await _userRepo.AddAsync(user);
@@ -42,24 +36,19 @@ namespace LibrarySystem.Services
 
             user.UserName = dto.UserName;
             user.UserEmail = dto.UserEmail;
-            user.LastModifiedBy = dto.LastModifiedBy;
-            user.LastModifiedDate = DateTime.Now;
+            user.UserTypeId = dto.UserTypeId;
 
-            await _userRepo.Update(user);
+            await _userRepo.UpdateAsync(user);
             await _userRepo.SaveAsync();
         }
 
         public async Task DeleteUser(int id, UserDeleteDto dto)
         {
             var user = await _userRepo.GetByIdAsync(id);
-            if (user == null || user.IsDeleted)
+            if (user == null)
                 throw new Exception("User not found");
 
-            user.IsDeleted = true;
-            user.DeletedBy = dto.UserDelete;
-            user.DeletedDate = DateTime.Now;
-
-            await _userRepo.Update(user);
+            await _userRepo.SoftDeleteAsync(user);
             await _userRepo.SaveAsync();
         }
 
@@ -70,7 +59,7 @@ namespace LibrarySystem.Services
             return users.Select(u => new UserListDto
             {
                 Id = u.Id,
-                UserName = u.UserName
+                UserName = u.UserName,
             }).ToList();
         }
     }

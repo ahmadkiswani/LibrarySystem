@@ -1,12 +1,11 @@
-﻿using LibrarySystem.Entities.Models;
-using LibrarySystem.Domain.Repositories;
-using LibrarySystem.Shared.DTOs;
+﻿using LibrarySystem.Domain.Repositories;
+using LibrarySystem.Entities.Models;
 using LibrarySystem.Services.Interfaces;
-using LibrarySystem.Shared.DTOs.PublisherDTOs;
+using LibrarySystem.Shared.DTOs;
 
 namespace LibrarySystem.Services
 {
-    public class PublisherService: IPublisherService    
+    public class PublisherService: IPublisherService
     {
         private readonly IGenericRepository<Publisher> _publisherRepo;
 
@@ -19,9 +18,7 @@ namespace LibrarySystem.Services
         {
             var publisher = new Publisher
             {
-                Name = dto.Name,
-                CreatedBy = 0,
-                CreatedDate = DateTime.Now
+                Name = dto.Name
             };
 
             await _publisherRepo.AddAsync(publisher);
@@ -35,10 +32,8 @@ namespace LibrarySystem.Services
                 throw new Exception("Publisher not found");
 
             publisher.Name = dto.Name;
-            publisher.LastModifiedBy = 1;
-            publisher.LastModifiedDate = DateTime.Now;
 
-            await _publisherRepo.Update(publisher);
+            await _publisherRepo.UpdateAsync(publisher);
             await _publisherRepo.SaveAsync();
         }
 
@@ -48,32 +43,24 @@ namespace LibrarySystem.Services
             if (publisher == null)
                 throw new Exception("Publisher not found");
 
-            publisher.IsDeleted = true;
-            publisher.DeletedBy = 1;
-            publisher.DeletedDate = DateTime.Now;
-
-            await _publisherRepo.Update(publisher);
+            await _publisherRepo.SoftDeleteAsync(publisher);
             await _publisherRepo.SaveAsync();
         }
 
         public async Task<List<PublisherListDto>> ListPublishers()
         {
             var publishers = await _publisherRepo.FindAsync(p => !p.IsDeleted);
+
             return publishers.Select(p => new PublisherListDto
             {
                 Id = p.Id,
                 Name = p.Name
             }).ToList();
         }
-        public async Task<List<PublisherDetailsDto>> GetAllPublishers()
-        {
-            var publishers = await _publisherRepo.FindAsync(p => !p.IsDeleted);
 
-            return publishers.Select(p => new PublisherDetailsDto
-            {
-                Id = p.Id,
-                Name = p.Name
-            }).ToList();
+        public Task<List<PublisherDetailsDto>> GetAllPublishers()
+        {
+            throw new NotImplementedException();
         }
     }
 }

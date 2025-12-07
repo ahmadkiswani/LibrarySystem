@@ -11,8 +11,7 @@ namespace LibrarySystem.Shared.DTOs.BookDtos
         [StringLength(150, MinimumLength = 2)]
         public string Title { get; set; }
 
-        [Required]
-        public DateTime PublishDate { get; set; }
+        
 
         [Required]
         [MaxLength(20)]
@@ -25,7 +24,6 @@ namespace LibrarySystem.Shared.DTOs.BookDtos
         [Required]
         public int PublisherId { get; set; }
 
-        public int CreatedBy { get; set; } = 1;
     }
 
 }

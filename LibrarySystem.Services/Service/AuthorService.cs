@@ -5,7 +5,6 @@ using LibrarySystem.Shared.DTOs;
 using LibrarySystem.Shared.DTOs.AuthorDtos;
 using LibrarySystem.Shared.DTOs.BookDtos;
 
-
 namespace LibrarySystem.Services
 {
     public class AuthorService : IAuthorService
@@ -13,7 +12,8 @@ namespace LibrarySystem.Services
         private readonly IGenericRepository<Author> _authorRepo;
         private readonly IGenericRepository<Book> _bookRepo;
 
-        public AuthorService(IGenericRepository<Author> authorRepo,
+        public AuthorService(
+            IGenericRepository<Author> authorRepo,
             IGenericRepository<Book> bookRepo)
         {
             _authorRepo = authorRepo;
@@ -24,9 +24,7 @@ namespace LibrarySystem.Services
         {
             var author = new Author
             {
-                AuthorName = dto.AuthorName,
-                CreatedBy = 0,
-                CreatedDate = DateTime.Now
+                AuthorName = dto.AuthorName
             };
 
             await _authorRepo.AddAsync(author);
@@ -35,10 +33,9 @@ namespace LibrarySystem.Services
 
         public async Task<List<AuthorListDto>> GetAllAuthors()
         {
-            var authors = await _authorRepo.GetAllAsync();
+            var authors = await _authorRepo.FindAsync(a => !a.IsDeleted);
 
             return authors
-                .Where(a => !a.IsDeleted)
                 .Select(a => new AuthorListDto
                 {
                     Id = a.Id,
@@ -54,9 +51,7 @@ namespace LibrarySystem.Services
             if (author == null || author.IsDeleted)
                 throw new Exception("Author not found");
 
-            var books = (await _bookRepo.GetAllAsync())
-                .Where(b => b.AuthorId == id && !b.IsDeleted)
-                .ToList();
+            var books = await _bookRepo.FindAsync(b => b.AuthorId == id && !b.IsDeleted);
 
             return new AuthorDetailsDto
             {
@@ -74,10 +69,8 @@ namespace LibrarySystem.Services
                 throw new Exception("Author not found");
 
             author.AuthorName = dto.AuthorName;
-            author.LastModifiedBy = dto.Id;
-            author.LastModifiedDate = DateTime.Now;
 
-            await _authorRepo.Update(author);
+            await _authorRepo.UpdateAsync(author);
             await _authorRepo.SaveAsync();
         }
 
@@ -88,11 +81,7 @@ namespace LibrarySystem.Services
             if (author == null)
                 throw new Exception("Author not found");
 
-            author.IsDeleted = true;
-            author.DeletedBy = 1;
-            author.DeletedDate = DateTime.Now;
-
-            await _authorRepo.Update(author);
+            await _authorRepo.SoftDeleteAsync(author);
             await _authorRepo.SaveAsync();
         }
 
@@ -101,12 +90,13 @@ namespace LibrarySystem.Services
             int page = dto.Page <= 0 ? 1 : dto.Page;
             int pageSize = dto.PageSize <= 0 || dto.PageSize > 200 ? 10 : dto.PageSize;
 
-            var authors = (await _authorRepo.GetAllAsync())
-                .Where(a =>
-                    !a.IsDeleted &&
-                    (dto.Text == null || a.AuthorName.ToLower().Contains(dto.Text.ToLower())) &&
-                    (dto.Number == null || a.Id == dto.Number)
-                )
+            var authors = await _authorRepo.FindAsync(a =>
+                !a.IsDeleted &&
+                (dto.Text == null || a.AuthorName.ToLower().Contains(dto.Text.ToLower())) &&
+                (!dto.Number.HasValue || a.Id == dto.Number.Value)
+            );
+
+            return authors
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(a => new AuthorListDto
@@ -115,16 +105,13 @@ namespace LibrarySystem.Services
                     AuthorName = a.AuthorName
                 })
                 .ToList();
-
-            return authors;
         }
 
         public async Task<List<BookListDto>> GetBooksByAuthor(int authorId)
         {
-            var books = await _bookRepo.GetAllAsync();
+            var books = await _bookRepo.FindAsync(b => b.AuthorId == authorId && !b.IsDeleted);
 
             return books
-                .Where(b => b.AuthorId == authorId && !b.IsDeleted)
                 .Select(b => new BookListDto
                 {
                     Id = b.Id,
@@ -134,4 +121,4 @@ namespace LibrarySystem.Services
                 .ToList();
         }
     }
-}
+}       
