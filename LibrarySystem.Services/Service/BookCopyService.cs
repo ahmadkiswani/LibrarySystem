@@ -1,15 +1,12 @@
-﻿using LibrarySystem.Entities.Models;
-using LibrarySystem.Domain.Data;
-using LibrarySystem.Domain.Repositories;
-
-using LibrarySystem.Shared.DTOs.AuthorDtos;
-using LibrarySystem.Shared.DTOs.BookDtos;
+﻿using LibrarySystem.Domain.Repositories;
+using LibrarySystem.Entities.Models;
+using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.AvailableBookDto;
 
 
-namespace LibrarySystem.Service
+namespace LibrarySystem.Services
 {
-    public class BookCopyService
+    public class BookCopyService: IBookCopyService
     {
         private readonly IGenericRepository<BookCopy> _copyRepo;
         private readonly IGenericRepository<Book> _bookRepo;

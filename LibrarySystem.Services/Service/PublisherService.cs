@@ -1,14 +1,12 @@
 ﻿using LibrarySystem.Entities.Models;
-using LibrarySystem.Domain.Data;
 using LibrarySystem.Domain.Repositories;
-using LibrarySystem.Shared.DTOs.AuthorDtos;
-using LibrarySystem.Shared.DTOs.BookDtos;
 using LibrarySystem.Shared.DTOs;
+using LibrarySystem.Services.Interfaces;
+using LibrarySystem.Shared.DTOs.PublisherDTOs;
 
-
-namespace LibrarySystem.Service
+namespace LibrarySystem.Services
 {
-    public class PublisherService
+    public class PublisherService: IPublisherService    
     {
         private readonly IGenericRepository<Publisher> _publisherRepo;
 

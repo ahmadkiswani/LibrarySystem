@@ -1,4 +1,4 @@
-﻿using LibrarySystem.Service;
+﻿using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.UserDtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
         [Route("api/[controller]")]
         public class UserController : ControllerBase
         {
-            private readonly UserService _service;
+            private readonly IUserService _service;
 
-            public UserController(UserService service)
+            public UserController(IUserService service)
             {
                 _service = service;
             }

@@ -1,4 +1,4 @@
-﻿using LibrarySystem.Service;
+﻿using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.AvailableBookDto;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +8,9 @@ namespace LibrarySystemAPIs.Controllers
     [Route("api/[controller]")]
     public class BookCopyController : ControllerBase
     {
-        private readonly BookCopyService _service;
+        private readonly IBookCopyService _service;
 
-        public BookCopyController(BookCopyService service)
+        public BookCopyController(IBookCopyService service)
         {
             _service = service;
         }

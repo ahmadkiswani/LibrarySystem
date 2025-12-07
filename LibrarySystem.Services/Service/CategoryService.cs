@@ -1,15 +1,12 @@
 ﻿using LibrarySystem.Entities.Models;
 using LibrarySystem.Domain.Data;
 using LibrarySystem.Domain.Repositories;
-
-using LibrarySystem.Shared.DTOs.AuthorDtos;
-using LibrarySystem.Shared.DTOs.BookDtos;
 using LibrarySystem.Shared.DTOs;
-
-
-namespace LibrarySystem.Service
+using LibrarySystem.Services.Interfaces;
+using LibrarySystem.Shared.DTOs.CategoryDtos;
+namespace LibrarySystem.Services
 {
-    public class CategoryService
+    public class CategoryService: ICategoryService  
     {
         private readonly IGenericRepository<Category> _categoryRepo;
 

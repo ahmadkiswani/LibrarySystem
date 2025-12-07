@@ -4,12 +4,13 @@ using LibrarySystem.Domain.Repositories;
 using LibrarySystem.Shared.DTOs.AuthorDtos;
 using LibrarySystem.Shared.DTOs.BookDtos;
 using LibrarySystem.Shared.DTOs.UserDtos;
+using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.UserDtos.LibrarySystem.Shared.DTOs;
 
 
-namespace LibrarySystem.Service
+namespace LibrarySystem.Services
 {
-    public class UserService
+    public class UserService: IUserService  
     {
         private readonly IGenericRepository<User> _userRepo;
 

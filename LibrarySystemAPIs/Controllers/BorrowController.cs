@@ -1,4 +1,4 @@
-﻿using LibrarySystem.Service;
+﻿using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.BorrowDTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +8,9 @@ namespace LibrarySystemAPIs.Controllers
     [Route("api/[controller]")]
     public class BorrowController : ControllerBase
     {
-        private readonly BorrowService _service;
+        private readonly IBorrowService _service;
 
-        public BorrowController(BorrowService service)
+        public BorrowController(IBorrowService service)
         {
             _service = service;
         }

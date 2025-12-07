@@ -1,27 +1,24 @@
-﻿using LibrarySystem.Service;
+﻿using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
 using LibrarySystem.Shared.DTOs.AuthorDtos;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LibrarySystemAPIs.Controllers
+namespace LibrarySystem.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class AuthorController : ControllerBase
     {
-        private readonly AuthorService _service;
+        private readonly IAuthorService _service;
 
-        public AuthorController(AuthorService service)
+        public AuthorController(IAuthorService service)
         {
             _service = service;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] AuthorCreateDto dto)
+        public async Task<IActionResult> AddAuthor([FromBody] AuthorCreateDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.AuthorName))
-                return BadRequest("AuthorName is required");
-
             await _service.AddAuthor(dto);
             return Ok("Author added successfully");
         }
@@ -35,45 +32,21 @@ namespace LibrarySystemAPIs.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                return Ok(await _service.GetAuthorById(id));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return Ok(await _service.GetAuthorById(id));
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] AuthorUpdateDto dto)
         {
-            if (id <= 0)
-                return BadRequest("Invalid ID");
-
-            try
-            {
-                await _service.EditAuthor(id, dto);
-                return Ok("Author updated successfully");
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _service.EditAuthor(id, dto);
+            return Ok("Author updated successfully");
         }
 
-        [HttpPut("Delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                await _service.DeleteAuthor(id);
-                return Ok("Author deleted successfully");
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _service.DeleteAuthor(id);
+            return Ok("Author deleted successfully");
         }
     }
 }

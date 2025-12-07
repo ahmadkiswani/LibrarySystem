@@ -1,27 +1,26 @@
-﻿using LibrarySystem.Service;
+﻿using Microsoft.AspNetCore.Mvc;
+using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.BookDtos;
-using Microsoft.AspNetCore.Mvc;
 
-namespace LibrarySystemAPIs.Controllers
+namespace LibrarySystem.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly BookService _service;
+        private readonly IBookService _service;
 
-        public BookController(BookService service)
+        public BookController(IBookService service)
         {
             _service = service;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] BookCreateDto dto)
+        public async Task<IActionResult> AddBook([FromBody] BookCreateDto dto)
         {
-            var newBookId = await _service.AddBook(dto);
-            return Ok(newBookId);
+            var id = await _service.AddBook(dto);
+            return Ok(id);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -32,24 +31,17 @@ namespace LibrarySystemAPIs.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                return Ok(await _service.GetBookById(id));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return Ok(await _service.GetBookById(id));
         }
 
-        [HttpPut("Update/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] BookUpdateDto dto)
         {
             await _service.EditBook(id, dto);
             return Ok("Book updated successfully");
         }
 
-        [HttpPut("Delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             await _service.DeleteBook(id);

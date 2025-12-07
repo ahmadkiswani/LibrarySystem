@@ -1,13 +1,12 @@
 using LibrarySystem.Domain.Data;
 using LibrarySystem.Domain.Repositories;
-using LibrarySystem.Service;
 using LibrarySystem.Services;
+using LibrarySystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -28,16 +27,15 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-builder.Services.AddScoped<AuthorService>();
-builder.Services.AddScoped<BookService>();
-builder.Services.AddScoped<BookCopyService>();
-builder.Services.AddScoped<BorrowService>();
-builder.Services.AddScoped<CategoryService>();
-builder.Services.AddScoped<PublisherService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IBookCopyService, BookCopyService>();
+builder.Services.AddScoped<IBorrowService, BorrowService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IPublisherService, PublisherService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
-
 
 app.UseSwagger();
 app.UseSwaggerUI();

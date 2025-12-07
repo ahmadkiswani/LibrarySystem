@@ -1,5 +1,5 @@
 ﻿
-using LibrarySystem.Service;
+using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +9,9 @@ namespace LibrarySystemAPIs.Controllers
     [Route("api/[controller]")]
     public class PublisherController : ControllerBase
     {
-        private readonly PublisherService _service;
+        private readonly IPublisherService _service;
 
-        public PublisherController(PublisherService service)
+        public PublisherController(IPublisherService service)
         {
             _service = service;
         }
