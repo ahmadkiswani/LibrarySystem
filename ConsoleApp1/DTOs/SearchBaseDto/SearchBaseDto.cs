@@ -8,7 +8,7 @@ namespace LibrarySystem.DTOs
     {
         public string? Text { get; set; }
 
-        public string? Sort { get; set; }  // asc, desc
+        public string? Sort { get; set; }  
 
 
         public int Page { get; set; } 

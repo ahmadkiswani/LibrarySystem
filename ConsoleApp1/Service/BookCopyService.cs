@@ -16,9 +16,6 @@ namespace LibrarySystem.Service
             _copyRepo = copyRepo;
             _bookRepo = bookRepo;
         }
-
-
-
         public async Task AddBookCopy(BookCopyCreateDto dto)
         {
             var book = await _bookRepo.GetByIdAsync(dto.BookId);
@@ -38,11 +35,10 @@ namespace LibrarySystem.Service
             };
 
             await _copyRepo.AddAsync(copy);
+            book.TotalCopies += 1;
+            await _bookRepo.Update(book);
             await _copyRepo.SaveAsync();
         }
-
-
-
         public async Task DeleteBookCopy(int id)
         {
             var copy = await _copyRepo.GetByIdAsync(id);

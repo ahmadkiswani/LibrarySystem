@@ -1,5 +1,5 @@
-﻿using LibrarySystem.DTOs.UserDtos;
-using LibrarySystem.Service;
+﻿using LibrarySystem.Service;
+using LibrarySystem.Shared.DTOs.UserDtos;
 using Microsoft.AspNetCore.Mvc;
 
     namespace LibrarySystemAPIs.Controllers

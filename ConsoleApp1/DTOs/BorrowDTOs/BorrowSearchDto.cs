@@ -11,5 +11,4 @@ namespace LibrarySystem.DTOs.BorrowDTOs
         public int? BookCopyId { get; set; }
         public bool? Returned { get; set; }
     }
-
 }

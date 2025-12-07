@@ -58,7 +58,7 @@ namespace LibrarySystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors");
+                    b.ToTable("Authors", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.Book", b =>
@@ -124,7 +124,7 @@ namespace LibrarySystem.Migrations
 
                     b.HasIndex("PublisherId");
 
-                    b.ToTable("Books");
+                    b.ToTable("Books", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.BookCopy", b =>
@@ -186,7 +186,7 @@ namespace LibrarySystem.Migrations
 
                     b.HasIndex("PublisherId");
 
-                    b.ToTable("BookCopies");
+                    b.ToTable("BookCopies", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.Borrow", b =>
@@ -245,7 +245,7 @@ namespace LibrarySystem.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Borrows");
+                    b.ToTable("Borrows", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.Category", b =>
@@ -284,7 +284,7 @@ namespace LibrarySystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.Publisher", b =>
@@ -323,7 +323,7 @@ namespace LibrarySystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Publishers");
+                    b.ToTable("Publishers", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Models.User", b =>
@@ -378,7 +378,7 @@ namespace LibrarySystem.Migrations
 
                     b.HasIndex("UserTypeId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
 
                     b.HasData(
                         new
@@ -427,7 +427,7 @@ namespace LibrarySystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserTypes");
+                    b.ToTable("UserTypes", (string)null);
 
                     b.HasData(
                         new

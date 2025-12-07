@@ -64,5 +64,15 @@ namespace LibrarySystem.Service
                 Name = p.Name
             }).ToList();
         }
+        public async Task<List<PublisherDetailsDto>> GetAllPublishers()
+        {
+            var publishers = await _publisherRepo.FindAsync(p => !p.IsDeleted);
+
+            return publishers.Select(p => new PublisherDetailsDto
+            {
+                Id = p.Id,
+                Name = p.Name
+            }).ToList();
+        }
     }
 }

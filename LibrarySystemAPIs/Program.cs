@@ -1,12 +1,13 @@
-using LibrarySystem.Data;
+using LibrarySystem.Domain.Data;
+using LibrarySystem.Domain.Repositories;
 using LibrarySystem.Service;
+using LibrarySystem.Services;
 using Microsoft.EntityFrameworkCore;
-using LibrarySystem.Repository;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -37,15 +38,13 @@ builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
 app.UseCors("AllowAll");
 
-
 app.UseHttpsRedirection();
-
 
 app.UseAuthorization();
 

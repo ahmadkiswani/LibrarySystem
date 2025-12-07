@@ -1,6 +1,6 @@
-﻿using LibrarySystem.DTOs;
-using LibrarySystem.DTOs.PublisherDTOs;
+﻿
 using LibrarySystem.Service;
+using LibrarySystem.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystemAPIs.Controllers
@@ -27,6 +27,18 @@ namespace LibrarySystemAPIs.Controllers
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _service.ListPublishers());
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id, [FromBody] PublisherDetailsDto dto)
+        {
+            try
+            {
+                return Ok(await _service.GetAllPublishers());
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("Update/{id}")]

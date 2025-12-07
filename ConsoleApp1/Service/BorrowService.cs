@@ -35,7 +35,6 @@ namespace LibrarySystem.Service
             copy.IsAvailable = false;
             copy.LastModifiedDate = DateTime.Now;
             copy.LastModifiedBy = dto.UserId;
-
             await _copyRepo.Update(copy);
 
             var borrow = new Borrow
@@ -80,5 +79,29 @@ namespace LibrarySystem.Service
 
             await _borrowRepo.SaveAsync();
         }
+        public async Task<List<Borrow>> Search(BorrowSearchDto dto)
+        {
+            IQueryable<Borrow> query =
+                (await _borrowRepo.FindAsync(b => true)).AsQueryable();
+
+            query = query
+                .Where(b => !dto.Number.HasValue || b.Id == dto.Number.Value)
+                .Where(b => !dto.UserId.HasValue || b.UserId == dto.UserId.Value)
+                .Where(b => !dto.BookCopyId.HasValue || b.BookCopyId == dto.BookCopyId.Value)
+                .Where(b => !dto.Returned.HasValue ||
+                        (dto.Returned.Value == true ? b.ReturnDate != null
+                                                     : b.ReturnDate == null));
+
+            int page = dto.Page <= 0 ? 1 : dto.Page;
+            int pageSize = dto.PageSize <= 0 ? 10 : dto.PageSize;
+
+            return query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+
+
     }
 }
+    

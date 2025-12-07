@@ -1,25 +1,21 @@
 ﻿using LibrarySystem.Models;
 using System;
-using System.Collections.Generic;
+using LibrarySystem.Models;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace LibrarySystem.DTOs.UserDtos
 {
     public class UserCreateDto
     {
         [Required]
-        [StringLength(40)]
-        public string UserName { get; set; }
+        [StringLength(40, MinimumLength = 2)]
+        public string UserName { get; set; } = string.Empty;
 
         [Required]
         [EmailAddress]
         [StringLength(120)]
-        public string UserEmail { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
 
-        
-        [Required]
-        public int CreatedBy { get; set; }
+        public int CreatedBy { get; set; } = 1;
     }
 }
-

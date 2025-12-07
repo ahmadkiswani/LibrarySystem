@@ -1,5 +1,5 @@
-﻿using LibrarySystem.DTOs.BookDtos;
-using LibrarySystem.Service;
+﻿using LibrarySystem.Service;
+using LibrarySystem.Shared.DTOs.BookDtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystemAPIs.Controllers
