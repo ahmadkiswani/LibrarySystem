@@ -1,6 +1,8 @@
-﻿using LibrarySystem.Services.Interfaces;
+﻿using LibrarySystem.API.Helpers;
+using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
 using LibrarySystem.Shared.DTOs.AuthorDtos;
+using LibrarySystem.Shared.DTOs.Helper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystem.API.Controllers
@@ -19,34 +21,120 @@ namespace LibrarySystem.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddAuthor([FromBody] AuthorCreateDto dto)
         {
+            var validation = ValidationHelper.ValidateDto(this, dto);
+            if (!validation.IsValid)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+            }
+
             await _service.AddAuthor(dto);
-            return Ok("Author added successfully");
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Author added successfully"
+            });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _service.GetAllAuthors());
+            var authors = await _service.GetAllAuthors();
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Authors fetched successfully",
+                Data = authors
+            });
         }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            return Ok(await _service.GetAuthorById(id));
+            try
+            {
+                var author = await _service.GetAuthorById(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Author fetched successfully",
+                    Data = author
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] AuthorUpdateDto dto)
         {
-            await _service.EditAuthor(id, dto);
-            return Ok("Author updated successfully");
+            var validation = ValidationHelper.ValidateDto(this, dto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+            }
+
+            try
+            {
+                await _service.EditAuthor(id, dto);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Author updated successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
 
-        [HttpDelete("{id}")]
+        [HttpPut("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteAuthor(id);
-            return Ok("Author deleted successfully");
+            try
+            {
+                await _service.DeleteAuthor(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Author deleted successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
     }
 }

@@ -2,10 +2,11 @@
 using LibrarySystem.Entities.Models;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Services
 {
-    public class PublisherService: IPublisherService
+    public class PublisherService : IPublisherService   
     {
         private readonly IGenericRepository<Publisher> _publisherRepo;
 
@@ -16,6 +17,12 @@ namespace LibrarySystem.Services
 
         public async Task AddPublisher(PublisherCreateDto dto)
         {
+            bool exists = await _publisherRepo.Query()
+                .AnyAsync(p => p.Name == dto.Name);
+
+            if (exists)
+                throw new Exception("Publisher already exists");
+
             var publisher = new Publisher
             {
                 Name = dto.Name
@@ -28,7 +35,7 @@ namespace LibrarySystem.Services
         public async Task EditPublisher(int id, PublisherUpdateDto dto)
         {
             var publisher = await _publisherRepo.GetByIdAsync(id);
-            if (publisher == null || publisher.IsDeleted)
+            if (publisher == null)
                 throw new Exception("Publisher not found");
 
             publisher.Name = dto.Name;
@@ -49,7 +56,7 @@ namespace LibrarySystem.Services
 
         public async Task<List<PublisherListDto>> ListPublishers()
         {
-            var publishers = await _publisherRepo.FindAsync(p => !p.IsDeleted);
+            var publishers = await _publisherRepo.GetAllAsync();
 
             return publishers.Select(p => new PublisherListDto
             {
@@ -58,9 +65,6 @@ namespace LibrarySystem.Services
             }).ToList();
         }
 
-        public Task<List<PublisherDetailsDto>> GetAllPublishers()
-        {
-            throw new NotImplementedException();
-        }
+    
     }
 }

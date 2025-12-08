@@ -11,6 +11,5 @@ namespace LibrarySystem.Services.Interfaces
         Task EditAuthor(int id, AuthorUpdateDto dto);
         Task DeleteAuthor(int id);
         Task<List<AuthorListDto>> Search(AuthorSearchDto dto);
-        Task<List<BookListDto>> GetBooksByAuthor(int authorId);
     }
 }

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using LibrarySystem.Services.Interfaces;
+﻿using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.BookDtos;
+using LibrarySystem.API.Helpers;
+using LibrarySystem.Shared.DTOs.Helper;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystem.API.Controllers
 {
@@ -15,37 +17,146 @@ namespace LibrarySystem.API.Controllers
             _service = service;
         }
 
+
         [HttpPost]
         public async Task<IActionResult> AddBook([FromBody] BookCreateDto dto)
         {
-            var id = await _service.AddBook(dto);
-            return Ok(id);
+            var validation = ValidationHelper.ValidateDto(this, dto);
+            if (!validation.IsValid)
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+
+            try
+            {
+                var id = await _service.AddBook(dto);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Book added successfully",
+                    Data = new { BookId = id }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _service.GetAllBooks());
+            var books = await _service.GetAllBooks();
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Books fetched successfully",
+                Data = books
+            });
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            return Ok(await _service.GetBookById(id));
+            try
+            {
+                var book = await _service.GetBookById(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Book fetched successfully",
+                    Data = book
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] BookUpdateDto dto)
         {
-            await _service.EditBook(id, dto);
-            return Ok("Book updated successfully");
+            var validation = ValidationHelper.ValidateDto(this, dto);
+            if (!validation.IsValid)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+            }
+
+            try
+            {
+                await _service.EditBook(id, dto);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Book updated successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
 
-        [HttpDelete("{id}")]
+
+        [HttpPut("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteBook(id);
-            return Ok("Book deleted successfully");
+            try
+            {
+                await _service.DeleteBook(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Book deleted successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+        [HttpPost("search")]
+        public async Task<IActionResult> Search([FromBody] BookSearchDto dto)
+        {
+            var result = await _service.SearchBooks(dto);
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Books search result",
+                Data = result
+            });
         }
     }
 }

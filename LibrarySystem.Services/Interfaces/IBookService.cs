@@ -9,5 +9,7 @@ namespace LibrarySystem.Services.Interfaces
         Task<BookDetailsDto> GetBookById(int id);
         Task EditBook(int id, BookUpdateDto dto);
         Task DeleteBook(int id);
+        Task<List<BookListDto>> SearchBooks(BookSearchDto dto);
+
     }
 }

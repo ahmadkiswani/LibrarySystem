@@ -1,11 +1,13 @@
-﻿using LibrarySystem.Services.Interfaces;
+﻿using LibrarySystem.API.Helpers;
+using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.AvailableBookDto;
+using LibrarySystem.Shared.DTOs.Helper;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LibrarySystemAPIs.Controllers
+namespace LibrarySystem.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class BookCopyController : ControllerBase
     {
         private readonly IBookCopyService _service;
@@ -16,67 +18,134 @@ namespace LibrarySystemAPIs.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] BookCopyCreateDto dto)
+        public async Task<IActionResult> AddCopy([FromBody] BookCopyCreateDto dto)
         {
-            if (dto.BookId <= 0)
-                return BadRequest("Invalid Book ID");
-
-            await _service.AddBookCopy(dto);
-            return Ok("Book copy added successfully");
-        }
-
-        [HttpPut("Delete/{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (id <= 0)
-                return BadRequest("Invalid ID");
+            var validation = ValidationHelper.ValidateDto(this, dto);
+            if (!validation.IsValid)
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
 
             try
             {
-                await _service.DeleteBookCopy(id);
-                return Ok("Book copy deleted successfully");
+                await _service.AddBookCopy(dto);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Copy added successfully"
+                });
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
             }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _service.ListBookCopies());
+            var result = await _service.ListBookCopies();
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Copies fetched successfully",
+                Data = result
+            });
         }
 
-        [HttpGet("copy/{id}")]
-        public async Task<IActionResult> GetSpecific(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCopy(int id)
         {
             try
             {
-                return Ok(await _service.GetSpecificCopy(id));
+                var copy = await _service.GetSpecificCopy(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Copy fetched successfully",
+                    Data = copy
+                });
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                await _service.DeleteBookCopy(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Copy deleted successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
             }
         }
 
         [HttpGet("total/{bookId}")]
-        public async Task<IActionResult> GetTotal(int bookId)
+        public async Task<IActionResult> GetTotalCopies(int bookId)
         {
-            return Ok(await _service.GetAllCopiesCount(bookId));
+            var count = await _service.GetAllCopiesCount(bookId);
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Total copies fetched",
+                Data = count
+            });
         }
 
         [HttpGet("available/{bookId}")]
-        public async Task<IActionResult> GetAvailable(int bookId)
+        public async Task<IActionResult> GetAvailableCopies(int bookId)
         {
-            return Ok(await _service.GetAvailableCount(bookId));
+            var count = await _service.GetAvailableCount(bookId);
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Available copies fetched",
+                Data = count
+            });
         }
 
         [HttpGet("borrowed/{bookId}")]
-        public async Task<IActionResult> GetBorrowed(int bookId)
+        public async Task<IActionResult> GetBorrowedCopies(int bookId)
         {
-            return Ok(await _service.GetBorrowedCount(bookId));
+            var count = await _service.GetBorrowedCount(bookId);
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Borrowed copies fetched",
+                Data = count
+            });
         }
     }
 }

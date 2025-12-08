@@ -5,7 +5,6 @@ namespace LibrarySystem.Domain.Data
 {
     public class LibraryDbContext : DbContext
     {
-        public LibraryDbContext() { }
         public LibraryDbContext(DbContextOptions<LibraryDbContext> options) : base(options) { }
 
         public DbSet<Author> Authors { get; set; }
@@ -68,6 +67,12 @@ namespace LibrarySystem.Domain.Data
                 .WithMany()
                 .HasForeignKey(u => u.DeletedBy)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.UserType)
+                .WithMany()
+                .HasForeignKey(u => u.UserTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<UserType>().HasData(
                 new UserType { Id = 1, TypeName = "Admin" },
                 new UserType { Id = 2, TypeName = "Librarian" },
@@ -92,12 +97,6 @@ namespace LibrarySystem.Domain.Data
 
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer("Server=SedraPay;Database=LibraryDB;Trusted_Connection=True;TrustServerCertificate=True;");
-            }
-        }
+        
     }
 }

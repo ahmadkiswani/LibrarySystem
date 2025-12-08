@@ -8,6 +8,5 @@ namespace LibrarySystem.Services.Interfaces
         Task EditPublisher(int id, PublisherUpdateDto dto);
         Task DeletePublisher(int id);
         Task<List<PublisherListDto>> ListPublishers();
-        Task<List<PublisherDetailsDto>> GetAllPublishers();
     }
 }

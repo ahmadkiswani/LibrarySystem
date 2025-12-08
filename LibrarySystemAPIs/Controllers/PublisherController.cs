@@ -1,12 +1,13 @@
-﻿
+﻿using LibrarySystem.API.Helpers;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
+using LibrarySystem.Shared.DTOs.Helper;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LibrarySystemAPIs.Controllers
+namespace LibrarySystem.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class PublisherController : ControllerBase
     {
         private readonly IPublisherService _service;
@@ -19,40 +20,105 @@ namespace LibrarySystemAPIs.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] PublisherCreateDto dto)
         {
-            await _service.AddPublisher(dto);
-            return Ok("Publisher added successfully");
+            var validation = ValidationHelper.ValidateDto(this, dto);
+            if (!validation.IsValid)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+            }
+
+            try
+            {
+                await _service.AddPublisher(dto);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Publisher added successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _service.ListPublishers());
+            var publishers = await _service.ListPublishers();
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Publishers retrieved successfully",
+                Data = publishers
+            });
         }
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id, [FromBody] PublisherDetailsDto dto)
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(int id, [FromBody] PublisherUpdateDto dto)
         {
+            var validation = ValidationHelper.ValidateDto(this, dto);
+            if (!validation.IsValid)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+            }
+
             try
             {
-                return Ok(await _service.GetAllPublishers());
+                await _service.EditPublisher(id, dto);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Publisher updated successfully"
+                });
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
             }
         }
 
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> Edit(int id, [FromBody] PublisherUpdateDto dto)
-        {
-            await _service.EditPublisher(id, dto);
-            return Ok("Publisher updated successfully");
-        }
-
-        [HttpPut("Delete/{id}")]
+        [HttpPut("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeletePublisher(id);
-            return Ok("Publisher deleted successfully");
+            try
+            {
+                await _service.DeletePublisher(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Publisher deleted successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
     }
 }

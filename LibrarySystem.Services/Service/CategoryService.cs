@@ -2,6 +2,7 @@
 using LibrarySystem.Entities.Models;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Services
 {
@@ -16,6 +17,12 @@ namespace LibrarySystem.Services
 
         public async Task AddCategory(CategoryCreateDto dto)
         {
+            bool exists = await _categoryRepo.Query()
+                .AnyAsync(c => c.Name == dto.Name);
+
+            if (exists)
+                throw new Exception("Category already exists");
+
             var category = new Category
             {
                 Name = dto.Name
@@ -28,7 +35,7 @@ namespace LibrarySystem.Services
         public async Task EditCategory(int id, CategoryUpdateDto dto)
         {
             var category = await _categoryRepo.GetByIdAsync(id);
-            if (category == null || category.IsDeleted)
+            if (category == null)
                 throw new Exception("Category not found");
 
             category.Name = dto.Name;
@@ -49,13 +56,15 @@ namespace LibrarySystem.Services
 
         public async Task<List<CategoryListDto>> ListCategories()
         {
-            var categories = await _categoryRepo.FindAsync(c => !c.IsDeleted);
+            var categories = await _categoryRepo.GetAllAsync();
 
-            return categories.Select(c => new CategoryListDto
-            {
-                Id = c.Id,
-                Name = c.Name
-            }).ToList();
+            return categories
+                .Select(c => new CategoryListDto
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                })
+                .ToList();
         }
     }
 }

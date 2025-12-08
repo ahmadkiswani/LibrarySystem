@@ -3,6 +3,7 @@ using LibrarySystem.Entities.Models;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.AvailableBookDto;
 using LibrarySystem.Shared.DTOs.BookDtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Services
 {
@@ -21,27 +22,45 @@ namespace LibrarySystem.Services
 
         public async Task AddBookCopy(BookCopyCreateDto dto)
         {
-            var book = await _bookRepo.GetByIdAsync(dto.BookId);
+            using var transaction = await _copyRepo.Context.Database.BeginTransactionAsync();
 
-            if (book == null || book.IsDeleted)
-                throw new Exception("Book not found");
-
-            var copy = new BookCopy
+            try
             {
-                BookId = dto.BookId,
-                AuthorId = book.AuthorId,
-                CategoryId = book.CategoryId,
-                PublisherId = book.PublisherId,
-                CopyCode = Guid.NewGuid().ToString().Substring(0, 8)
-            };
+                var book = await _bookRepo.GetByIdAsync(dto.BookId);
+                if (book == null)
+                    throw new Exception("Book does not exist");
 
-            await _copyRepo.AddAsync(copy);
+                int totalCopies = await _copyRepo.Query()
+                    .CountAsync(c => c.BookId == dto.BookId);
 
-            book.TotalCopies += 1;
-            await _bookRepo.UpdateAsync(book);
+                if (totalCopies >= 100)
+                    throw new Exception("Maximum number of copies reached");
 
-            await _copyRepo.SaveAsync();
+                var copy = new BookCopy
+                {
+                    BookId = dto.BookId,
+                    AuthorId = book.AuthorId,
+                    CategoryId = book.CategoryId,
+                    PublisherId = book.PublisherId,
+                    CopyCode = Guid.NewGuid().ToString()[..8]
+                };
+
+                await _copyRepo.AddAsync(copy);
+
+                book.TotalCopies += 1;
+                await _bookRepo.UpdateAsync(book);
+
+                await _copyRepo.SaveAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
+
 
         public async Task DeleteBookCopy(int id)
         {
@@ -56,20 +75,23 @@ namespace LibrarySystem.Services
 
         public async Task<List<BookCopyListDto>> ListBookCopies()
         {
-            var copies = await _copyRepo.FindAsync(c => !c.IsDeleted);
+            var copies = await _copyRepo.GetAllAsync();
 
-            return copies.Select(c => new BookCopyListDto
-            {
-                Id = c.Id,
-                BookId = c.BookId,
-                IsAvailable = c.IsAvailable
-            }).ToList();
+            return copies
+                .Select(c => new BookCopyListDto
+                {
+                    Id = c.Id,
+                    BookId = c.BookId,
+                    IsAvailable = c.IsAvailable
+                })
+                .ToList();
         }
 
         public async Task<BookCopy> GetSpecificCopy(int id)
         {
             var copy = await _copyRepo.GetByIdAsync(id);
-            if (copy == null || copy.IsDeleted)
+
+            if (copy == null)
                 throw new Exception("Copy not found");
 
             return copy;
@@ -77,20 +99,23 @@ namespace LibrarySystem.Services
 
         public async Task<int> GetAllCopiesCount(int bookId)
         {
-            var copies = await _copyRepo.FindAsync(c => c.BookId == bookId && !c.IsDeleted);
-            return copies.Count();
+            return await _copyRepo.Query()
+                .Where(c => c.BookId == bookId)
+                .CountAsync();
         }
 
         public async Task<int> GetAvailableCount(int bookId)
         {
-            var copies = await _copyRepo.FindAsync(c => c.BookId == bookId && !c.IsDeleted && c.IsAvailable);
-            return copies.Count();
+            return await _copyRepo.Query()
+                .Where(c => c.BookId == bookId && c.IsAvailable)
+                .CountAsync();
         }
 
         public async Task<int> GetBorrowedCount(int bookId)
         {
-            var copies = await _copyRepo.FindAsync(c => c.BookId == bookId && !c.IsDeleted && !c.IsAvailable);
-            return copies.Count();
+            return await _copyRepo.Query()
+                .Where(c => c.BookId == bookId && !c.IsAvailable)
+                .CountAsync();
         }
     }
 }

@@ -1,11 +1,13 @@
-﻿using LibrarySystem.Services.Interfaces;
+﻿using LibrarySystem.API.Helpers;
+using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.BorrowDTOs;
+using LibrarySystem.Shared.DTOs.Helper;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LibrarySystemAPIs.Controllers
+namespace LibrarySystem.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class BorrowController : ControllerBase
     {
         private readonly IBorrowService _service;
@@ -15,32 +17,81 @@ namespace LibrarySystemAPIs.Controllers
             _service = service;
         }
 
-        [HttpPost("Take")]
+        [HttpPost]
         public async Task<IActionResult> BorrowBook([FromBody] BorrowCreateDto dto)
         {
+            var validation = ValidationHelper.ValidateDto(this, dto);
+            if (!validation.IsValid)
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+
             try
             {
                 await _service.BorrowBook(dto);
-                return Ok("Book borrowed successfully");
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Book borrowed successfully"
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
             }
         }
 
-        [HttpPost("Return")]
+        [HttpPut("return")]
         public async Task<IActionResult> ReturnBook([FromBody] BorrowReturnDto dto)
         {
+            var validation = ValidationHelper.ValidateDto(this, dto);
+            if (!validation.IsValid)
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+
             try
             {
                 await _service.ReturnBook(dto);
-                return Ok("Book returned successfully");
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Book returned successfully"
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
             }
+        }
+
+        [HttpPost("search")]
+        public async Task<IActionResult> Search([FromBody] BorrowSearchDto dto)
+        {
+            var result = await _service.Search(dto);
+
+            return Ok(new BaseResponse<object>
+            {
+                Success = true,
+                Message = "Borrow search completed",
+                Data = result
+            });
         }
     }
 }

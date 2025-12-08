@@ -7,7 +7,7 @@ namespace LibrarySystem.Services.Interfaces
     {
         Task AddUser(UserCreateDto dto);
         Task EditUser(int id, UserUpdateDto dto);
-        Task DeleteUser(int id, UserDeleteDto dto);
+        Task DeleteUser(int id,UserDeleteDto dto);
         Task<List<UserListDto>> ListUsers();
     }
 }

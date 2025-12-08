@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using LibrarySystem.Domain.Data;
+using System.Linq.Expressions;
 
 namespace LibrarySystem.Domain.Repositories
 {
@@ -10,11 +11,12 @@ namespace LibrarySystem.Domain.Repositories
         Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate,
             Func<IQueryable<T>, IQueryable<T>> include);
 
+        IQueryable<T> Query();
+        LibraryDbContext Context { get; }
+
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
-
         Task SoftDeleteAsync(T entity);
-
         Task SaveAsync();
     }
 }
