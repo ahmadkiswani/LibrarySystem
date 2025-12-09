@@ -19,6 +19,7 @@ namespace LibrarySystem.Services
             _userRepo = userRepo;
             _userTypeRepo = userTypeRepo;
         }
+  
 
 
         public async Task AddUser(UserCreateDto dto)
@@ -133,7 +134,41 @@ namespace LibrarySystem.Services
                 UserTypeName = u.UserType != null ? u.UserType.TypeName : "Unknown"
             }).ToList();
         }
+		private async Task<string?> GetUserNameSafe(int? userId)
+		{
+			if (userId == null || userId == 0)
+				return null;
+
+			var user = await _userRepo.GetQueryable()
+				.FirstOrDefaultAsync(u => u.Id == userId.Value);
+
+			return user.UserName;
+		}
+
+		public async Task<UserDetailsDto> GetUserDetails(int id)
+		{
+			var user = await _userRepo.GetQueryable()
+				.Include(u => u.CreatedByUser)
+				.Include(u => u.LastModifiedByUser)
+				.Include(u => u.DeletedByUser)
+				.FirstOrDefaultAsync(u => u.Id == id);
+
+			if (user == null)
+				throw new Exception("User not found");
+
+			return new UserDetailsDto
+			{
+				Id = user.Id,
+				UserName = user.UserName,
+				UserEmail = user.UserEmail,
+				CreatedByUser = user.CreatedByUser,
+				LastModifiedByUser = user.LastModifiedByUser,
+				DeletedByUser = user.DeletedByUser
+			};
+		}
 
 
-    }
+
+
+	}
 }

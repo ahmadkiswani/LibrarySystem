@@ -87,6 +87,29 @@ namespace LibrarySystem.API.Controllers
                 });
             }
         }
+        [HttpGet("details/{id}")]
+        public async Task<IActionResult> GetDetails(int id)
+        {
+            try
+            {
+                var result = await _service.GetBookDetails(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "Book details fetched successfully",
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
 
 
         [HttpPut("{id}")]
@@ -149,7 +172,9 @@ namespace LibrarySystem.API.Controllers
         [HttpPost("search")]
         public async Task<IActionResult> Search([FromBody] BookSearchDto dto)
         {
-            var result = await _service.SearchBooks(dto);
+            var validation = ValidationHelper.ValidateDto(dto);
+            if (!validation.IsValid);
+                var result = await _service.SearchBooks(dto);
 
             return Ok(new BaseResponse<object>
             {

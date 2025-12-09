@@ -12,7 +12,7 @@ namespace LibrarySystem.Shared.DTOs.UserDtos
             public int Id { get; set; }
             public string UserName { get; set; }= string.Empty; 
             public string UserEmail { get; set; }= string.Empty;
-            public User? CreatedByUser { get; set; }= null;
+            public User? CreatedByUser { get; set; }
             public User? LastModifiedByUser { get; set; }
             public User? DeletedByUser { get; set; }
         }

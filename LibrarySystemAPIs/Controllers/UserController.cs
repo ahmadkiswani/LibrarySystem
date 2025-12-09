@@ -64,6 +64,30 @@ namespace LibrarySystem.API.Controllers
                 Data = users
             });
         }
+        [HttpGet("details/{id}")]
+        public async Task<IActionResult> GetUserDetails(int id)
+        {
+            try
+            {
+                var user = await _service.GetUserDetails(id);
+
+                return Ok(new BaseResponse<object>
+                {
+                    Success = true,
+                    Message = "User details fetched successfully",
+                    Data = user
+                });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] UserUpdateDto dto)
@@ -121,6 +145,7 @@ namespace LibrarySystem.API.Controllers
                 });
             }
         }
+
 
     }
 }
