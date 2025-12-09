@@ -2,6 +2,7 @@
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
 using LibrarySystem.Shared.DTOs.Helper;
+using LibrarySystem.Shared.DTOs.HelperDto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystem.API.Controllers
@@ -20,7 +21,7 @@ namespace LibrarySystem.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] CategoryCreateDto dto)
         {
-            var validation = ValidationHelper.ValidateDto(this, dto);
+            var validation = ValidationHelper.ValidateDto( dto);
             if (!validation.IsValid)
             {
                 return BadRequest(new BaseResponse<object>
@@ -67,7 +68,7 @@ namespace LibrarySystem.API.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] CategoryUpdateDto dto)
         {
-            var validation = ValidationHelper.ValidateDto(this, dto);
+            var validation = ValidationHelper.ValidateDto( dto);
             if (!validation.IsValid)
             {
                 return BadRequest(new BaseResponse<object>

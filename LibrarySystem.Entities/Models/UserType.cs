@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LibrarySystem.Entities.Models
 {
-    public class UserType: AuditLog 
+    public class UserType
     {
         public int Id { get; set; }
         public string TypeName { get; set; } = string.Empty;

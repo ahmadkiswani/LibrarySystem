@@ -1,12 +1,12 @@
-﻿using LibrarySystem.Shared.DTOs;
-using LibrarySystem.Shared.DTOs.Helper;
-using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySystem.Shared.DTOs.Helper;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace LibrarySystem.API.Helpers
 {
     public static class ValidationHelper
     {
-        public static ValidationResultDto ValidateDto(ControllerBase controller, object dto)
+        public static ValidationResultDto ValidateDto(object dto)
         {
             var result = new ValidationResultDto();
 
@@ -17,29 +17,33 @@ namespace LibrarySystem.API.Helpers
                 return result;
             }
 
-            if (!controller.ModelState.IsValid)
+            var properties = dto.GetType().GetProperties();
+
+            foreach (var prop in properties)
             {
-                result.IsValid = false;
+                var value = prop.GetValue(dto);
+                var attributes = prop.GetCustomAttributes<ValidationAttribute>(true);
 
-                foreach (var kvp in controller.ModelState)
+                foreach (var attribute in attributes)
                 {
-                    var fieldName = kvp.Key;
-                    var errors = kvp.Value.Errors;
-
-                    foreach (var error in errors)
+                    var context = new ValidationContext(dto)
                     {
-                        var message = string.IsNullOrWhiteSpace(fieldName)
-                            ? error.ErrorMessage
-                            : $"{fieldName}: {error.ErrorMessage}";
+                        MemberName = prop.Name
+                    };
 
-                        result.Errors.Add(message);
+                    var validationResult = attribute.GetValidationResult(value, context);
+
+                    if (validationResult != ValidationResult.Success)
+                    {
+                        result.IsValid = false;
+                        result.Errors.Add($"{prop.Name}: {validationResult.ErrorMessage}");
                     }
                 }
-
-                return result;
             }
 
-            result.IsValid = true;
+            if (!result.Errors.Any())
+                result.IsValid = true;
+
             return result;
         }
     }

@@ -1,7 +1,7 @@
 ﻿using LibrarySystem.API.Helpers;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.AvailableBookDto;
-using LibrarySystem.Shared.DTOs.Helper;
+using LibrarySystem.Shared.DTOs.HelperDto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystem.API.Controllers
@@ -20,7 +20,7 @@ namespace LibrarySystem.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddCopy([FromBody] BookCopyCreateDto dto)
         {
-            var validation = ValidationHelper.ValidateDto(this, dto);
+            var validation = ValidationHelper.ValidateDto( dto);
             if (!validation.IsValid)
                 return BadRequest(new BaseResponse<object>
                 {

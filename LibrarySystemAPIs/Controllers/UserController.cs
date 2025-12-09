@@ -1,6 +1,7 @@
 ﻿using LibrarySystem.API.Helpers;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.Helper;
+using LibrarySystem.Shared.DTOs.HelperDto;
 using LibrarySystem.Shared.DTOs.UserDtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ namespace LibrarySystem.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] UserCreateDto dto)
         {
-            var validation = ValidationHelper.ValidateDto(this, dto);
+            var validation = ValidationHelper.ValidateDto( dto);
             if (!validation.IsValid)
             {
                 return BadRequest(new BaseResponse<object>
@@ -67,7 +68,7 @@ namespace LibrarySystem.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] UserUpdateDto dto)
         {
-            var validation = ValidationHelper.ValidateDto(this, dto);
+            var validation = ValidationHelper.ValidateDto( dto);
             if (!validation.IsValid)
             {
                 return BadRequest(new BaseResponse<object>

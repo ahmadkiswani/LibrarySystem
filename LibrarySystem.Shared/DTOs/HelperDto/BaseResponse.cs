@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 
-namespace LibrarySystem.Shared.DTOs.Helper
+namespace LibrarySystem.Shared.DTOs.HelperDto
 {
     public class BaseResponse<T>
     {

@@ -43,7 +43,8 @@ namespace LibrarySystem.Services
                     CategoryId = book.CategoryId,
                     PublisherId = book.PublisherId,
                     CopyCode = Guid.NewGuid().ToString()[..8],
-                    IsAvailable = true  
+                    IsAvailable = true ,
+                    IsDeleted = false
 
                 };
 

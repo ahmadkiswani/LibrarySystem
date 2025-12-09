@@ -23,7 +23,6 @@ namespace LibrarySystem.Entities.Models
         public Category Category { get; set; }
         public int PublisherId { get; set; }
         public Publisher? Publisher { get; set; }
-        public bool IsDeleted { get; set; } = false;
         public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
  }
 
