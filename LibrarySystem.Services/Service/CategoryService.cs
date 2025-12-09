@@ -17,7 +17,7 @@ namespace LibrarySystem.Services
 
         public async Task AddCategory(CategoryCreateDto dto)
         {
-            bool exists = await _categoryRepo.Query()
+            bool exists = await _categoryRepo.GetQueryable()
                 .AnyAsync(c => c.Name == dto.Name);
 
             if (exists)

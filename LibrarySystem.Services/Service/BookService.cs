@@ -34,22 +34,22 @@
 
         public async Task<int> AddBook(BookCreateDto dto)
         {
-            var authorExists = await _authorRepo.Query()
+            var authorExists = await _authorRepo.GetQueryable()
                 .AnyAsync(a => a.Id == dto.AuthorId);
             if (!authorExists)
                 throw new Exception("Author does not exist");
 
-            var categoryExists = await _categoryRepo.Query()
+            var categoryExists = await _categoryRepo.GetQueryable()
                 .AnyAsync(c => c.Id == dto.CategoryId);
             if (!categoryExists)
                 throw new Exception("Category does not exist");
 
-            var publisherExists = await _publisherRepo.Query()
+            var publisherExists = await _publisherRepo.GetQueryable()
                 .AnyAsync(p => p.Id == dto.PublisherId);
             if (!publisherExists)
                 throw new Exception("Publisher does not exist");
 
-            bool bookExists = await _bookRepo.Query()
+            bool bookExists = await _bookRepo.GetQueryable()
                 .AnyAsync(b => b.Title == dto.Title
                                && b.Version == dto.Version
                                && b.AuthorId == dto.AuthorId);
@@ -87,7 +87,7 @@
 
         public async Task<BookDetailsDto> GetBookById(int id)
             {
-                var book = await _bookRepo.Query()
+                var book = await _bookRepo.GetQueryable()
                     .Include(b => b.Author)
                     .Include(b => b.Category)
                     .Include(b => b.Publisher)
@@ -97,14 +97,14 @@
                     throw new Exception("Book not found");
 
             
-                var copies = await _copyRepo.Query()
+                var copies = await _copyRepo.GetQueryable()
                     .Where(c => c.BookId == id)
                     .ToListAsync();
 
                 int available = copies.Count(c => c.IsAvailable);
                 int borrowed = copies.Count(c => !c.IsAvailable);
 
-                var borrowRecords = await _borrowRepo.Query()
+                var borrowRecords = await _borrowRepo.GetQueryable()
                     .Include(b => b.BookCopy)
                     .Where(b => b.BookCopy.BookId == id)
                     .ToListAsync();
@@ -158,7 +158,7 @@
             }
         public async Task<List<BookListDto>> GetBooksByAuthor(int authorId)
         {
-            return await _bookRepo.Query()
+            return await _bookRepo.GetQueryable()
                 .Where(b => b.AuthorId == authorId)
                 .Select(b => new BookListDto
                 {
@@ -170,7 +170,7 @@
 
         public async Task<List<BookListDto>> GetBooksByCategory(int categoryId)
         {
-            return await _bookRepo.Query()
+            return await _bookRepo.GetQueryable()
                 .Where(b => b.CategoryId == categoryId)
                 .Select(b => new BookListDto
                 {
@@ -182,7 +182,7 @@
 
         public async Task<List<BookListDto>> GetBooksByPublisher(int publisherId)
         {
-            return await _bookRepo.Query()
+            return await _bookRepo.GetQueryable()
                 .Where(b => b.PublisherId == publisherId)
                 .Select(b => new BookListDto
                 {
@@ -194,7 +194,7 @@
         public async Task<List<BookListDto>> SearchBooks(BookSearchDto dto)
         {
             var query =
-                _bookRepo.Query()
+                _bookRepo.GetQueryable()
 
                 .Where(b =>
                     (string.IsNullOrEmpty(dto.Text) ||
@@ -225,8 +225,8 @@
                     !dto.Available.HasValue ||
                     (
                         dto.Available.Value
-                            ? _copyRepo.Query().Any(c => c.BookId == b.Id && c.IsAvailable)
-                            : !_copyRepo.Query().Any(c => c.BookId == b.Id && c.IsAvailable)
+                            ? _copyRepo.GetQueryable().Any(c => c.BookId == b.Id && c.IsAvailable)
+                            : !_copyRepo.GetQueryable().Any(c => c.BookId == b.Id && c.IsAvailable)
                     )
                 );
 

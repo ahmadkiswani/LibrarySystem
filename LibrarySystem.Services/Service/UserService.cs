@@ -23,19 +23,19 @@ namespace LibrarySystem.Services
 
         public async Task AddUser(UserCreateDto dto)
         {
-            bool emailExists = await _userRepo.Query()
+            bool emailExists = await _userRepo.GetQueryable()
                 .AnyAsync(u => u.UserEmail == dto.UserEmail);
 
             if (emailExists)
                 throw new Exception("Email already exists");
 
-            bool usernameExists = await _userRepo.Query()
+            bool usernameExists = await _userRepo.GetQueryable()
                 .AnyAsync(u => u.UserName == dto.UserName);
 
             if (usernameExists)
                 throw new Exception("Username already exists");
 
-            bool typeExists = await _userTypeRepo.Query()
+            bool typeExists = await _userTypeRepo.GetQueryable()
                 .AnyAsync(t => t.Id == dto.UserTypeId);
 
             if (!typeExists)
@@ -59,19 +59,19 @@ namespace LibrarySystem.Services
             if (user == null)
                 throw new Exception("User not found");
 
-            bool emailExists = await _userRepo.Query()
+            bool emailExists = await _userRepo.GetQueryable()
                 .AnyAsync(u => u.UserEmail == dto.UserEmail && u.Id != id);
 
             if (emailExists)
                 throw new Exception("Email already exists for another user");
 
-            bool usernameExists = await _userRepo.Query()
+            bool usernameExists = await _userRepo.GetQueryable()
                 .AnyAsync(u => u.UserName == dto.UserName && u.Id != id);
 
             if (usernameExists)
                 throw new Exception("Username already exists for another user");
 
-            bool typeExists = await _userTypeRepo.Query()
+            bool typeExists = await _userTypeRepo.GetQueryable()
                 .AnyAsync(t => t.Id == dto.UserTypeId);
 
             if (!typeExists)
@@ -81,7 +81,7 @@ namespace LibrarySystem.Services
 
             if (user.UserTypeId == 1 && dto.UserTypeId != 1)
             {
-                int adminCount = await _userRepo.Query()
+                int adminCount = await _userRepo.GetQueryable()
                     .CountAsync(u => u.UserTypeId == 1);
 
                 if (adminCount == 1)
@@ -106,7 +106,7 @@ namespace LibrarySystem.Services
 
             if (user.UserTypeId == 1)
             {
-                int adminCount = await _userRepo.Query()
+                int adminCount = await _userRepo.GetQueryable()
                     .CountAsync(u => u.UserTypeId == 1);
 
                 if (adminCount == 1)

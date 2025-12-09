@@ -41,7 +41,7 @@ namespace LibrarySystem.Services
                 if (!copy.IsAvailable)
                     throw new Exception("Copy is not available");
 
-                int activeBorrows = await _borrowRepo.Query()
+                int activeBorrows = await _borrowRepo.GetQueryable()
                     .CountAsync(b => b.UserId == dto.UserId && b.ReturnDate == null);
 
                 if (activeBorrows >= 5)
@@ -108,7 +108,7 @@ namespace LibrarySystem.Services
 
         public async Task<List<Borrow>> Search(BorrowSearchDto dto)
         {
-            var query = _borrowRepo.Query()
+            var query = _borrowRepo.GetQueryable()
                 .Where(b => !dto.Number.HasValue || b.Id == dto.Number.Value)
                 .Where(b => !dto.UserId.HasValue || b.UserId == dto.UserId.Value)
                 .Where(b => !dto.BookCopyId.HasValue || b.BookCopyId == dto.BookCopyId.Value)

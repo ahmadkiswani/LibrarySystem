@@ -17,7 +17,7 @@ namespace LibrarySystem.Services
 
         public async Task AddPublisher(PublisherCreateDto dto)
         {
-            bool exists = await _publisherRepo.Query()
+            bool exists = await _publisherRepo.GetQueryable()
                 .AnyAsync(p => p.Name == dto.Name);
 
             if (exists)

@@ -30,7 +30,7 @@ namespace LibrarySystem.Services
                 if (book == null)
                     throw new Exception("Book does not exist");
 
-                int totalCopies = await _copyRepo.Query()
+                int totalCopies = await _copyRepo.GetQueryable()
                     .CountAsync(c => c.BookId == dto.BookId);
 
                 if (totalCopies >= 100)
@@ -100,21 +100,21 @@ namespace LibrarySystem.Services
 
         public async Task<int> GetAllCopiesCount(int bookId)
         {
-            return await _copyRepo.Query()
+            return await _copyRepo.GetQueryable()
                 .Where(c => c.BookId == bookId)
                 .CountAsync();
         }
 
         public async Task<int> GetAvailableCount(int bookId)
         {
-            return await _copyRepo.Query()
+            return await _copyRepo.GetQueryable()
                 .Where(c => c.BookId == bookId && c.IsAvailable)
                 .CountAsync();
         }
 
         public async Task<int> GetBorrowedCount(int bookId)
         {
-            return await _copyRepo.Query()
+            return await _copyRepo.GetQueryable()
                 .Where(c => c.BookId == bookId && !c.IsAvailable)
                 .CountAsync();
         }

@@ -76,7 +76,7 @@ namespace LibrarySystem.Domain.Repositories
         }
 
 
-        public IQueryable<T> Query()
+        public IQueryable<T> GetQueryable()
         {
             IQueryable<T> query = _dbSet.AsNoTracking();
 

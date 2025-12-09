@@ -78,7 +78,7 @@ namespace LibrarySystem.Services
 
         public async Task<List<AuthorListDto>> Search(AuthorSearchDto dto)
         {
-            var query = _authorRepo.Query();
+            var query = _authorRepo.GetQueryable();
 
             if (!string.IsNullOrWhiteSpace(dto.Text))
                 query = query.Where(a => a.AuthorName.Contains(dto.Text));

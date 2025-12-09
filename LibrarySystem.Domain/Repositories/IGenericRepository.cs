@@ -11,7 +11,7 @@ namespace LibrarySystem.Domain.Repositories
         Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate,
             Func<IQueryable<T>, IQueryable<T>> include);
 
-        IQueryable<T> Query();
+        IQueryable<T> GetQueryable();
         LibraryDbContext Context { get; }
 
         Task AddAsync(T entity);
