@@ -10,8 +10,6 @@ namespace LibrarySystem.Services.Interfaces
         Task EditBook(int id, BookUpdateDto dto);
         Task DeleteBook(int id);
         Task<List<BookListDto>> SearchBooks(BookSearchDto dto);
-        Task<BookDetailsDto> GetBookDetails(int id);
-
 
     }
 }
