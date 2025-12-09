@@ -18,7 +18,7 @@ namespace LibrarySystem.Entities.Models
         public string Version { get; set; }
         public int TotalCopies { get;  set; } 
         public int AuthorId { get; set; }
-        public Author Author { get; set; }
+        public Author?Author { get; set; }
         public int CategoryId { get; set; }
         public Category Category { get; set; }
         public int PublisherId { get; set; }

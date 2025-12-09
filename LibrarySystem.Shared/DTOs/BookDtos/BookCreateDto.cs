@@ -9,13 +9,13 @@ namespace LibrarySystem.Shared.DTOs.BookDtos
     {
         [Required]
         [StringLength(150, MinimumLength = 2)]
-        public string Title { get; set; }
+        public string Title { get; set; }= string.Empty;
 
-        
+
 
         [Required]
         [MaxLength(20)]
-        public string Version { get; set; }
+        public string Version { get; set; }= string.Empty;
         [Required]
         public int AuthorId { get; set; }
 

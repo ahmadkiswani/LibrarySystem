@@ -7,7 +7,7 @@ namespace LibrarySystem.Shared.DTOs
     public class PublisherListDto
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; }= string.Empty;
     }
 }
 

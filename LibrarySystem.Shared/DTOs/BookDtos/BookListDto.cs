@@ -7,8 +7,8 @@ namespace LibrarySystem.Shared.DTOs.BookDtos
     public class BookListDto
     {
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string? AuthorName { get; set; }
+        public string Title { get; set; }= string.Empty;    
+        public string AuthorName { get; set; }= string.Empty;   
         public string? CategoryName { get; set; }
         public string? PublisherName { get; set; }
         public int TotalCopies { get; set; }

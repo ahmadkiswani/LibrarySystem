@@ -9,6 +9,6 @@ namespace LibrarySystem.Shared.DTOs
     {
         [Required]
         [StringLength(80)]
-        public string Name { get; set; }
+        public string Name { get; set; }= string.Empty; 
     }
 }
