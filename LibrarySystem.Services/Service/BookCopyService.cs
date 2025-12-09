@@ -42,11 +42,12 @@ namespace LibrarySystem.Services
                     AuthorId = book.AuthorId,
                     CategoryId = book.CategoryId,
                     PublisherId = book.PublisherId,
-                    CopyCode = Guid.NewGuid().ToString()[..8]
+                    CopyCode = Guid.NewGuid().ToString()[..8],
+                    IsAvailable = true  
+
                 };
 
                 await _copyRepo.AddAsync(copy);
-
                 book.TotalCopies += 1;
                 await _bookRepo.UpdateAsync(book);
 

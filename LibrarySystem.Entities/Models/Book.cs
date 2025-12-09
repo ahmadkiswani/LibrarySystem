@@ -16,7 +16,7 @@ namespace LibrarySystem.Entities.Models
         public DateTime PublishDate { get; set; }
         [MaxLength(50)]
         public string Version { get; set; }
-        public int TotalCopies { get;  set; } = 0;
+        public int TotalCopies { get;  set; } 
         public int AuthorId { get; set; }
         public Author Author { get; set; }
         public int CategoryId { get; set; }

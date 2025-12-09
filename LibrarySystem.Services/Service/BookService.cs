@@ -73,17 +73,19 @@
         }
 
         public async Task<List<BookListDto>> GetAllBooks()
+        {
+            var books = await _bookRepo.GetAllAsync();
+
+            return books.Select(b => new BookListDto
             {
-                var books = await _bookRepo.GetAllAsync();
+                Id = b.Id,
+                Title = b.Title,
+                TotalCopies = b.TotalCopies
+            }).ToList();
+        }
 
-                return books.Select(b => new BookListDto
-                {
-                    Id = b.Id,
-                    Title = b.Title
-                }).ToList();
-            }
 
-            public async Task<BookDetailsDto> GetBookById(int id)
+        public async Task<BookDetailsDto> GetBookById(int id)
             {
                 var book = await _bookRepo.Query()
                     .Include(b => b.Author)
