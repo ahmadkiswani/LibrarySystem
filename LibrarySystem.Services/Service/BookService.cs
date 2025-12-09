@@ -251,8 +251,43 @@
                 })
                 .ToListAsync();
         }
+        public async Task<BookDetailsDto> GetBookDetails(int id)
+        {
+            var book = await _bookRepo.GetByIdAsync(id);
+            if (book == null)
+                throw new Exception("Book not found");
 
-       
+            int totalCopies = await _copyRepo.GetQueryable()
+                .CountAsync(c => c.BookId == id);
+
+            int availableCopies = await _copyRepo.GetQueryable()
+                .CountAsync(c => c.BookId == id && c.IsAvailable);
+
+            int borrowedCopies = totalCopies - availableCopies;
+
+            return new BookDetailsDto
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Version = book.Version,
+                PublishDate = book.PublishDate,
+
+                AuthorName = "Unknown",   
+                CategoryName = "Unknown",  
+                PublisherName = "Unknown",
+
+                TotalCopies = totalCopies,
+                AvailableCopies = availableCopies,
+                BorrowedCopies = borrowedCopies,
+
+                LastBorrowedDate = null,
+                IsDeleted = book.IsDeleted
+            };
+        }
+
+
+
+
 
 
     }

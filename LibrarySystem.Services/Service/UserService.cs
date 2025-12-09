@@ -134,16 +134,6 @@ namespace LibrarySystem.Services
                 UserTypeName = u.UserType != null ? u.UserType.TypeName : "Unknown"
             }).ToList();
         }
-		private async Task<string?> GetUserNameSafe(int? userId)
-		{
-			if (userId == null || userId == 0)
-				return null;
-
-			var user = await _userRepo.GetQueryable()
-				.FirstOrDefaultAsync(u => u.Id == userId.Value);
-
-			return user.UserName;
-		}
 
 		public async Task<UserDetailsDto> GetUserDetails(int id)
 		{
