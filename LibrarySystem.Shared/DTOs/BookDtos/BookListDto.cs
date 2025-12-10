@@ -12,6 +12,8 @@ namespace LibrarySystem.Shared.DTOs.BookDtos
         public string? CategoryName { get; set; }
         public string? PublisherName { get; set; }
         public int TotalCopies { get; set; }
+        public int AvailableCopies { get; set; }    
+
 
 
     }

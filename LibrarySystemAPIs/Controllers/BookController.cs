@@ -173,15 +173,35 @@ namespace LibrarySystem.API.Controllers
         public async Task<IActionResult> Search([FromBody] BookSearchDto dto)
         {
             var validation = ValidationHelper.ValidateDto(dto);
-            if (!validation.IsValid);
-                var result = await _service.SearchBooks(dto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validation.Errors
+                });
+            }
+
+            var result = await _service.SearchBooks(dto);
+
+            var errors = new List<string>();
+            if (result == null || result.Count == 0)
+            {
+                errors.Add("No books found with the given Data.");
+            }
 
             return Ok(new BaseResponse<object>
             {
-                Success = true,
-                Message = "Books search result",
-                Data = result
+                Success = errors.Count == 0,
+                Message = errors.Count == 0 ? "Books search result" : "Search returned no results",
+                Data = result,
+                Errors = errors
             });
         }
-    }
+    };
+        
+
 }
+

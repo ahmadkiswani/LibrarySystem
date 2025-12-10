@@ -1,4 +1,4 @@
-﻿    using LibrarySystem.Domain.Repositories;
+﻿        using LibrarySystem.Domain.Repositories;
     using LibrarySystem.Entities.Models;
     using LibrarySystem.Services.Interfaces;
     using LibrarySystem.Shared.DTOs.BookDtos;
@@ -6,6 +6,7 @@
 
     namespace LibrarySystem.Services
     {
+
         public class BookService : IBookService
         {
             private readonly IGenericRepository<Book> _bookRepo;
@@ -156,90 +157,29 @@
                 await _bookRepo.SoftDeleteAsync(book);
                 await _bookRepo.SaveAsync();
             }
-        public async Task<List<BookListDto>> GetBooksByAuthor(int authorId)
-        {
-            return await _bookRepo.GetQueryable()
-                .Where(b => b.AuthorId == authorId)
-                .Select(b => new BookListDto
-                {
-                    Id = b.Id,
-                    Title = b.Title
-                })
-                .ToListAsync();
-        }
 
-        public async Task<List<BookListDto>> GetBooksByCategory(int categoryId)
-        {
-            return await _bookRepo.GetQueryable()
-                .Where(b => b.CategoryId == categoryId)
-                .Select(b => new BookListDto
-                {
-                    Id = b.Id,
-                    Title = b.Title
-                })
-                .ToListAsync();
-        }
-
-        public async Task<List<BookListDto>> GetBooksByPublisher(int publisherId)
-        {
-            return await _bookRepo.GetQueryable()
-                .Where(b => b.PublisherId == publisherId)
-                .Select(b => new BookListDto
-                {
-                    Id = b.Id,
-                    Title = b.Title
-                })
-                .ToListAsync();
-        }
         public async Task<List<BookListDto>> SearchBooks(BookSearchDto dto)
         {
-            var query =
-                _bookRepo.GetQueryable()
 
-                .Where(b =>
-                    (string.IsNullOrEmpty(dto.Text) ||
-                        b.Title.ToLower().Contains(dto.Text.ToLower()))
-                    &&
-                    (string.IsNullOrEmpty(dto.Title) ||
-                        b.Title.ToLower().Contains(dto.Title.ToLower()))
-                )
+            int page = dto.Page.HasValue && dto.Page.Value > 0 ? dto.Page.Value : 1;
+            int pageSize = dto.PageSize.HasValue && dto.PageSize.Value > 0 ? dto.PageSize.Value : 10;
 
-               
-                .Where(b =>
-                    string.IsNullOrEmpty(dto.Version) ||
-                    b.Version == dto.Version
-                )
+            int? author = dto.AuthorId > 0 ? dto.AuthorId : null;
+            int? category = dto.CategoryId > 0 ? dto.CategoryId : null;
+            int? publisher = dto.PublisherId > 0 ? dto.PublisherId : null;
 
+            var query = _bookRepo.GetQueryable()
+                .Include(b => b.Author)
+                .Include(b => b.Category)
+                .Include(b => b.Publisher)
                 .Where(b =>
-                    !dto.PublishDate.HasValue ||
-                    b.PublishDate == dto.PublishDate.Value
-                )
+                    (string.IsNullOrWhiteSpace(dto.Title) ||
+                     b.Title.ToLower().Contains(dto.Title.ToLower()))
 
-                .Where(b =>
-                    (!dto.AuthorId.HasValue || b.AuthorId == dto.AuthorId.Value) &&
-                    (!dto.CategoryId.HasValue || b.CategoryId == dto.CategoryId.Value) &&
-                    (!dto.PublisherId.HasValue || b.PublisherId == dto.PublisherId.Value)
-                )
-
-                .Where(b =>
-                    !dto.Available.HasValue ||
-                    (
-                        dto.Available.Value
-                            ? _copyRepo.GetQueryable().Any(c => c.BookId == b.Id && c.IsAvailable)
-                            : !_copyRepo.GetQueryable().Any(c => c.BookId == b.Id && c.IsAvailable)
-                    )
+                    && (author == null || b.AuthorId == author)
+                    && (category == null || b.CategoryId == category)
+                    && (publisher == null || b.PublisherId == publisher)
                 );
-
-            query = dto.SortBy?.ToLower() switch
-            {
-                "title" => dto.SortDescending ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title),
-                "publishdate" => dto.SortDescending ? query.OrderByDescending(b => b.PublishDate) : query.OrderBy(b => b.PublishDate),
-                "version" => dto.SortDescending ? query.OrderByDescending(b => b.Version) : query.OrderBy(b => b.Version),
-                _ => query.OrderBy(b => b.Title) 
-            };
-
-            int page = dto.Page > 0 ? dto.Page : 1;
-            int pageSize = dto.PageSize > 0 ? dto.PageSize : 10;
 
             return await query
                 .Skip((page - 1) * pageSize)
@@ -247,10 +187,19 @@
                 .Select(b => new BookListDto
                 {
                     Id = b.Id,
-                    Title = b.Title
+                    Title = b.Title,
+                    AuthorName = b.Author.AuthorName,
+                    CategoryName = b.Category.Name,
+                    PublisherName = b.Publisher.Name,
+                    TotalCopies = _copyRepo.GetQueryable().Count(c => c.BookId == b.Id),
+                    AvailableCopies = _copyRepo.GetQueryable().Count(c => c.BookId == b.Id && c.IsAvailable)
                 })
                 .ToListAsync();
         }
+
+
+
+
         public async Task<BookDetailsDto> GetBookDetails(int id)
         {
             var book = await _bookRepo.GetByIdAsync(id);
