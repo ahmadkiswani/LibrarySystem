@@ -13,6 +13,8 @@ namespace LibrarySystem.Shared.DTOs.HelperDto
 
         public T? Data { get; set; }
         public List<string> Errors { get; set; } = new List<string>();
+        public string? CorrelationId { get; set; }
+
     }
 }
 

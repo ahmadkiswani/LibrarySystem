@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\LibrarySystem.Domain\LibrarySystem.Domain.csproj" />
     <ProjectReference Include="..\LibrarySystem.Entities\LibrarySystem.Entities.csproj" />
+    <ProjectReference Include="..\LibrarySystem.Logging\LibrarySystem.Logging.csproj" />
     <ProjectReference Include="..\LibrarySystem.Services\LibrarySystem.Services.csproj" />
     <ProjectReference Include="..\LibrarySystem.Shared\LibrarySystem.Shared.csproj" />
   </ItemGroup>

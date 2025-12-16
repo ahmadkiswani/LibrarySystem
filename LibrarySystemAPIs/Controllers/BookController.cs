@@ -46,7 +46,7 @@ namespace LibrarySystem.API.Controllers
                 return BadRequest(new BaseResponse<object>
                 {
                     Success = false,
-                    Message = ex.Message
+                    Message = ex.Message,
                 });
             }
         }
@@ -170,6 +170,7 @@ namespace LibrarySystem.API.Controllers
             }
         }
         [HttpPost("search")]
+
         public async Task<IActionResult> Search([FromBody] BookSearchDto dto)
         {
             var validation = ValidationHelper.ValidateDto(dto);
@@ -200,8 +201,18 @@ namespace LibrarySystem.API.Controllers
                 Errors = errors
             });
         }
-    };
+        [HttpGet("test-exception")]
+        public IActionResult TestException()
+        {
+            throw new Exception("TEST EXCEPTION FROM CONTROLLER");
+        }
+
+
+
+    }
+
+};
         
 
-}
+
 

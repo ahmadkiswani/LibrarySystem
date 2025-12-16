@@ -1,12 +1,39 @@
+using LibrarySystem.API.Middleware;
 using LibrarySystem.Domain.Data;
 using LibrarySystem.Domain.Repositories;
+using LibrarySystem.Logging.Interfaces;
+using LibrarySystem.Logging.Services;
+using LibrarySystem.Logging.Settings;
 using LibrarySystem.Services;
 using LibrarySystem.Services.Interfaces;
+using LibrarySystem.Shared.DTOs.HelperDto;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .SelectMany(e => e.Value.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            var response = new BaseResponse<object>
+            {
+                Success = false,
+                Message = "Validation failed",
+                Errors = errors
+            };
+
+            return new BadRequestObjectResult(response);
+        };
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -34,6 +61,12 @@ builder.Services.AddScoped<IBorrowService, BorrowService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.Configure<MongoSettings>(
+builder.Configuration.GetSection("MongoSettings"));
+builder.Services.AddSingleton<ILogService, MongoLogService>();
+
+
+
 
 var app = builder.Build();
 
@@ -46,6 +79,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseMiddleware<LoggingMiddleware>();
+
 app.MapControllers();
+
 
 app.Run();

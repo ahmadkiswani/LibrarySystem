@@ -7,8 +7,6 @@ namespace LibrarySystem.Shared.DTOs.BookDtos
 {
     public class BookUpdateDto
     {
-        [Required]  
-        public int Id { get; set; }
 
         [Required]
         [StringLength(150, MinimumLength = 2)]
@@ -22,15 +20,11 @@ namespace LibrarySystem.Shared.DTOs.BookDtos
         public string Version { get; set; }
 
         [Required]
-        [Range(1, 2000)]
-
-      
         public int AuthorId { get; set; }
 
-        [Required]
+        
         public int CategoryId { get; set; }
 
-        [Required]
         public int PublisherId { get; set; }
     }
 

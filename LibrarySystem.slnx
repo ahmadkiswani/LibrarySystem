@@ -1,7 +1,12 @@
 <Solution>
-  <Project Path="LibrarySystem.Domain/LibrarySystem.Domain.csproj" Id="f2479357-f1f4-42d2-8eca-7cfb319ca115" />
-  <Project Path="LibrarySystem.Entities/LibrarySystem.Entities.csproj" Id="b642f400-7ffb-48a0-a850-3876bdc70bd8" />
-  <Project Path="LibrarySystem.Services/LibrarySystem.Services.csproj" Id="ee6cf478-a579-46ab-ab62-478b8033e3aa" />
-  <Project Path="LibrarySystem.Shared/LibrarySystem.Shared.csproj" Id="336ec415-b5ab-4a31-b916-377c31a5ae62" />
-  <Project Path="LibrarySystemAPIs/LibrarySystemAPIs.csproj" Id="3f663217-f820-4e3f-8725-41c4ab064aac" />
+  <Folder Name="/Librbary Management/">
+    <Project Path="LibrarySystem.Domain/LibrarySystem.Domain.csproj" Id="f2479357-f1f4-42d2-8eca-7cfb319ca115" />
+    <Project Path="LibrarySystem.Entities/LibrarySystem.Entities.csproj" Id="b642f400-7ffb-48a0-a850-3876bdc70bd8" />
+    <Project Path="LibrarySystem.Services/LibrarySystem.Services.csproj" Id="ee6cf478-a579-46ab-ab62-478b8033e3aa" />
+    <Project Path="LibrarySystem.Shared/LibrarySystem.Shared.csproj" Id="336ec415-b5ab-4a31-b916-377c31a5ae62" />
+    <Project Path="LibrarySystemAPIs/LibrarySystemAPIs.csproj" Id="3f663217-f820-4e3f-8725-41c4ab064aac" />
+  </Folder>
+  <Folder Name="/logging/">
+    <Project Path="LibrarySystem.Logging/LibrarySystem.Logging.csproj" Id="da0d8bf0-8a89-4633-957a-e6f98ea9b6ca" />
+  </Folder>
 </Solution>
