@@ -24,7 +24,8 @@ namespace LibrarySystem.API.Middleware
             context.Request.EnableBuffering();
             string requestBody = string.Empty;
 
-            if (context.Request.ContentLength > 0)
+            if (context.Request.Body.CanRead)
+
             {
                 using var reader = new StreamReader(
                     context.Request.Body,

@@ -8,5 +8,6 @@ public class LogRequestDto
     public DateTime Time { get; set; }
     public string ServiceName { get; set; }
     public string Request { get; set; }
-}
+    public string LogLevel { get; set; } = "Request";
 
+}

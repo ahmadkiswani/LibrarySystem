@@ -9,5 +9,7 @@ namespace LibrarySystem.Logging.DTOs
         public string CorrelationId { get; set; }
         public string ServiceName { get; set; }
         public string Response { get; set; }
+        public string LogLevel { get; set; } = "Response";
+
     }
 }

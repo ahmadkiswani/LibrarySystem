@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using LibrarySystem.Entities.Models;
+﻿using System.ComponentModel.DataAnnotations;
 namespace LibrarySystem.Shared.DTOs.AuthorDtos
 {
     public class AuthorUpdateDto

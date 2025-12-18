@@ -16,8 +16,6 @@ namespace LibrarySystem.API.Controllers
         {
             _service = service;
         }
-
-
         [HttpPost]
         public async Task<IActionResult> AddBook([FromBody] BookCreateDto dto)
         {
@@ -29,7 +27,6 @@ namespace LibrarySystem.API.Controllers
                     Message = "Validation failed",
                     Errors = validation.Errors
                 });
-
             try
             {
                 var id = await _service.AddBook(dto);
@@ -50,7 +47,6 @@ namespace LibrarySystem.API.Controllers
                 });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -110,8 +106,6 @@ namespace LibrarySystem.API.Controllers
                 });
             }
         }
-
-
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, [FromBody] BookUpdateDto dto)
         {
@@ -145,8 +139,6 @@ namespace LibrarySystem.API.Controllers
                 });
             }
         }
-
-
         [HttpPut("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -206,13 +198,6 @@ namespace LibrarySystem.API.Controllers
         {
             throw new Exception("TEST EXCEPTION FROM CONTROLLER");
         }
-
-
-
     }
 
 };
-        
-
-
-

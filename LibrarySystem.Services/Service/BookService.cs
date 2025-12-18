@@ -69,7 +69,6 @@
 
             await _bookRepo.AddAsync(book);
             await _bookRepo.SaveAsync();
-
             return book.Id;
         }
 
