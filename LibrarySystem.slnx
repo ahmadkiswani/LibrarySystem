@@ -9,4 +9,7 @@
   <Folder Name="/logging/">
     <Project Path="LibrarySystem.Logging/LibrarySystem.Logging.csproj" Id="da0d8bf0-8a89-4633-957a-e6f98ea9b6ca" />
   </Folder>
+  <Folder Name="/UserIdentity/">
+    <Project Path="LibrarySystem.UserIdentity/LibrarySystem.UserIdentity.csproj" Id="a635ff2b-1935-4287-a8e7-cf5cdc441740" />
+  </Folder>
 </Solution>
