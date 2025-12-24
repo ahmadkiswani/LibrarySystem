@@ -4,10 +4,9 @@ using System.Text;
 
 public class LogRequestDto
 {
-    public string CorrelationId { get; set; }
+    public string CorrelationId { get; set; }= null!;   
     public DateTime Time { get; set; }
-    public string ServiceName { get; set; }
-    public string Request { get; set; }
-    public string LogLevel { get; set; } = "Request";
+    public string? ServiceName { get; set; }
+    public string? Request { get; set; }
 
 }

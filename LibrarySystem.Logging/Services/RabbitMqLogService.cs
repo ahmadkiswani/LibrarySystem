@@ -6,12 +6,11 @@ using System.Text.Json;
 
 namespace LibrarySystem.Logging.Services
 {
-
-    public class RabbitMqLogService : ILogService
+    public class RabbitMqLogEventPublisher : ILogEventPublisher
     {
         private readonly IConnection _connection;
 
-        public RabbitMqLogService()
+        public RabbitMqLogEventPublisher()
         {
             var factory = new ConnectionFactory
             {
@@ -21,20 +20,14 @@ namespace LibrarySystem.Logging.Services
             _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
         }
 
-        public async Task LogRequestAsync(LogRequestDto dto)
-        {
-            await PublishAsync("request-response-queue", dto);
-        }
+        public Task PublishRequestAsync(LogRequestDto dto)
+            => PublishAsync("request-response-queue", dto);
 
-        public async Task LogResponseAsync(LogResponseDto dto)
-        {
-            await PublishAsync("request-response-queue", dto);
-        }
+        public Task PublishResponseAsync(LogResponseDto dto)
+            => PublishAsync("request-response-queue", dto);
 
-        public async Task LogExceptionAsync(LogExceptionDto dto)
-        {
-            await PublishAsync("exceptions-queue", dto);
-        }
+        public Task PublishExceptionAsync(LogExceptionDto dto)
+            => PublishAsync("exceptions-queue", dto);
 
         private async Task PublishAsync(string queueName, object message)
         {

@@ -1,11 +1,12 @@
 ﻿using LibrarySystem.UserIdentity.DTOs;
+using LibrarySystem.UserIdentity.Iinterface;
 using LibrarySystem.UserIdentity.Models;
-using LibrarySystem.UserIdentity.Services.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 
 namespace LibrarySystem.UserIdentity.Services
 {
@@ -51,6 +52,7 @@ namespace LibrarySystem.UserIdentity.Services
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new Exception(errors);
             }
+            await _userManager.AddToRoleAsync(user, "User");
         }
 
    

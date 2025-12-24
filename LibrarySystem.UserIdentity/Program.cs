@@ -1,12 +1,13 @@
 using LibrarySystem.UserIdentity.Data;
 using LibrarySystem.UserIdentity.Models;
 using LibrarySystem.UserIdentity.Services;
-using LibrarySystem.UserIdentity.Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using LibrarySystem.UserIdentity.Seed;
+using LibrarySystem.UserIdentity.Iinterface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,7 @@ builder.Services.AddAuthentication(options =>
 
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 
 builder.Services.AddControllers();
@@ -68,8 +70,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-
 app.UseCors("AllowAll");
 
 app.UseSwagger();
@@ -81,5 +81,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole<int>>>();
+
+    await RoleSeeder.SeedAsync(roleManager);
+}
+
 
 app.Run();

@@ -78,7 +78,7 @@ namespace LibrarySystem.Services
 			if (!typeExists)
 				throw new Exception("UserType does not exist");
 
-			bool isLastAdmin = false;
+		
 
 			if (user.UserTypeId == 1 && dto.UserTypeId != 1)
 			{

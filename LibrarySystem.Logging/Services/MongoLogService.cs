@@ -1,5 +1,4 @@
 ﻿using LibrarySystem.Logging.DTOs;
-using LibrarySystem.Logging.Interfaces;
 using LibrarySystem.Logging.Models;
 using LibrarySystem.Logging.Settings;
 using Microsoft.Extensions.Options;
@@ -7,7 +6,7 @@ using MongoDB.Driver;
 
 namespace LibrarySystem.Logging.Services
 {
-    public class MongoLogService : ILogService
+    public class MongoLogService
     {
         private readonly IMongoCollection<HttpLog> _httpLogs;
         private readonly IMongoCollection<ExceptionLog> _exceptionLogs;
@@ -21,12 +20,12 @@ namespace LibrarySystem.Logging.Services
             _exceptionLogs = db.GetCollection<ExceptionLog>(settings.Value.ExceptionLogsCollection);
         }
 
-        public async Task LogRequestAsync(LogRequestDto dto)
+        public async Task SaveRequestAsync(LogRequestDto dto)
         {
             var log = new HttpLog
             {
                 CorrelationId = dto.CorrelationId,
-                Time = DateTime.UtcNow,
+                Time = dto.Time,
                 ServiceName = dto.ServiceName,
                 Request = dto.Request,
                 LogLevel = "Request"
@@ -35,13 +34,13 @@ namespace LibrarySystem.Logging.Services
             await _httpLogs.InsertOneAsync(log);
         }
 
-        public async Task LogResponseAsync(LogResponseDto dto)
+        public async Task SaveResponseAsync(LogResponseDto dto)
         {
             var log = new HttpLog
             {
                 CorrelationId = dto.CorrelationId,
-                Time = DateTime.UtcNow,
-                ServiceName = dto.ServiceName,
+                Time = dto.Time,
+                ServiceName =dto.ServiceName,
                 Response = dto.Response,
                 LogLevel = "Response"
             };
@@ -49,15 +48,18 @@ namespace LibrarySystem.Logging.Services
             await _httpLogs.InsertOneAsync(log);
         }
 
-        public async Task LogExceptionAsync(LogExceptionDto dto)
+        public async Task SaveExceptionAsync(LogExceptionDto dto)
         {
             var log = new ExceptionLog
             {
                 CorrelationId = dto.CorrelationId,
-                Time = DateTime.UtcNow,
+                Time = dto.Time,
                 ServiceName = dto.ServiceName,
-                ExceptionMessage = dto.Message,
-                StackTrace = dto.StackTrace
+                Message = dto.Message,
+                StackTrace = dto.StackTrace,
+                Request = dto.Request,
+                Response = dto.Response,
+
             };
 
             await _exceptionLogs.InsertOneAsync(log);

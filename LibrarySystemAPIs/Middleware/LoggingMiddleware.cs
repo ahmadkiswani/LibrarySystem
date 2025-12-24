@@ -13,38 +13,34 @@ namespace LibrarySystem.API.Middleware
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, ILogService logService)
+        public async Task InvokeAsync(
+            HttpContext context,
+            ILogEventPublisher publisher)
         {
             var correlationId = Guid.NewGuid().ToString();
             var serviceName = "LibrarySystem.API";
 
             context.Items["CorrelationId"] = correlationId;
 
-            //Req
+         
             context.Request.EnableBuffering();
+
             string requestBody = string.Empty;
-
             if (context.Request.Body.CanRead)
-
             {
                 using var reader = new StreamReader(
                     context.Request.Body,
                     Encoding.UTF8,
-                    leaveOpen: true
-                );
+                    leaveOpen: true);
 
                 requestBody = await reader.ReadToEndAsync();
                 context.Request.Body.Position = 0;
             }
 
-            await logService.LogRequestAsync(new LogRequestDto
-            {
-                CorrelationId = correlationId,
-                ServiceName = serviceName,
-                Request = $"{context.Request.Method} {context.Request.Path} {requestBody}"
-            });
+            var requestText =
+                $"{context.Request.Method} {context.Request.Path} {requestBody}";
 
-            //Res
+           
             var originalBody = context.Response.Body;
             using var responseBody = new MemoryStream();
             context.Response.Body = responseBody;
@@ -53,43 +49,60 @@ namespace LibrarySystem.API.Middleware
             {
                 await _next(context);
 
-                responseBody.Seek(0, SeekOrigin.Begin);
+                responseBody.Position = 0;
                 var responseText = await new StreamReader(responseBody).ReadToEndAsync();
 
+             
                 bool isLogicalError =
                     context.Response.StatusCode >= 400 ||
                     responseText.Contains("\"success\":false");
 
                 if (isLogicalError)
                 {
-                    await logService.LogExceptionAsync(new LogExceptionDto
+                    await publisher.PublishExceptionAsync(new LogExceptionDto
                     {
                         CorrelationId = correlationId,
+                        Time = DateTime.UtcNow,
                         ServiceName = serviceName,
-                        Message = "Logical / Business Error",
-                        StackTrace = responseText
+                        Request = requestText,
+                        Response = responseText,
+                        Message = "Logical / Business error"
+                    });
+                }
+                else
+                {
+                    await publisher.PublishRequestAsync(new LogRequestDto
+                    {
+                        CorrelationId = correlationId,
+                        Time = DateTime.UtcNow,
+                        ServiceName = serviceName,
+                        Request = requestText
+                    });
+
+                    await publisher.PublishResponseAsync(new LogResponseDto
+                    {
+                        CorrelationId = correlationId,
+                        Time = DateTime.UtcNow,
+                        ServiceName = serviceName,
+                        Response = responseText
                     });
                 }
 
-                await logService.LogResponseAsync(new LogResponseDto
-                {
-                    CorrelationId = correlationId,
-                    ServiceName = serviceName,
-                    Response = responseText
-                });
-
-                var bytes = Encoding.UTF8.GetBytes(responseText);
-                context.Response.Body = originalBody;
-                await context.Response.Body.WriteAsync(bytes);
+             
+                responseBody.Position = 0;
+                await responseBody.CopyToAsync(originalBody);
             }
             catch (Exception ex)
             {
-                await logService.LogExceptionAsync(new LogExceptionDto
+             
+                await publisher.PublishExceptionAsync(new LogExceptionDto
                 {
                     CorrelationId = correlationId,
+                    Time = DateTime.UtcNow,
                     ServiceName = serviceName,
+                    Request = requestText,
                     Message = ex.Message,
-                    StackTrace = ex.StackTrace ?? string.Empty
+                    StackTrace = ex.StackTrace
                 });
 
                 context.Response.Body = originalBody;

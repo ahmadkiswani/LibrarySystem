@@ -4,17 +4,19 @@ using LibrarySystem.Logging.Consumers;
 
 namespace LibrarySystem.Logging.Services
 {
-    public class LoggingHostedService : BackgroundService
+    public class HostedService : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public LoggingHostedService(IServiceScopeFactory scopeFactory)
+        public HostedService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Console.WriteLine(">>> HostedService.ExecuteAsync STARTED");
+
             using var scope = _scopeFactory.CreateScope();
 
             var requestConsumer =
@@ -26,8 +28,13 @@ namespace LibrarySystem.Logging.Services
             await requestConsumer.StartAsync();
             await exceptionConsumer.StartAsync();
 
-            await Task.Delay(Timeout.Infinite, stoppingToken);
+            try
+            {
+                await Task.Delay(Timeout.Infinite, stoppingToken);
+            }
+            catch (TaskCanceledException)
+            {
+            }
         }
     }
 }
-//hangfierjobs

@@ -1,7 +1,8 @@
 ﻿using LibrarySystem.UserIdentity.DTOs;
 using LibrarySystem.UserIdentity.Helpers;
-using LibrarySystem.UserIdentity.Services.Interface;
+using LibrarySystem.UserIdentity.Iinterface;
 using LibrarySystem.UserIdentity.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystem.UserIdentity.Controllers
@@ -86,5 +87,27 @@ namespace LibrarySystem.UserIdentity.Controllers
                 );
             }
         }
+        [Authorize]
+        [HttpGet("whoami")]
+        public IActionResult WhoAmI()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
+                              ?? User.FindFirst("sub");
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized(
+                    BaseResponse<string>.FailureResponse("Invalid token")
+                );
+            }
+
+            return Ok(
+                BaseResponse<object>.SuccessResponse(
+                    new { UserId = int.Parse(userIdClaim.Value) },
+                    "Current user id from token"
+                )
+            );
+        }
+
     }
 }

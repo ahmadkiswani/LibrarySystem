@@ -1,6 +1,6 @@
 ﻿using LibrarySystem.UserIdentity.DTOs;
 
-namespace LibrarySystem.UserIdentity.Services.Interface
+namespace LibrarySystem.UserIdentity.Iinterface
 {
     public interface IUserService
     {

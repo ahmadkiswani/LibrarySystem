@@ -7,16 +7,18 @@ namespace LibrarySystem.Logging.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = null!;
 
         public string CorrelationId { get; set; } = null!;
 
         public DateTime Time { get; set; }
 
-        public string ServiceName { get; set; } = null!;
+        public string? ServiceName { get; set; } = null!;
 
-        public string ExceptionMessage { get; set; } = null!;
+        public string? Message { get; set; } = null!;
 
         public string StackTrace { get; set; } = null!;
+        public string?Request { get;  set; }
+        public string? Response { get;  set; }
+        public string? ErrorType { get;  set; }
     }
 }

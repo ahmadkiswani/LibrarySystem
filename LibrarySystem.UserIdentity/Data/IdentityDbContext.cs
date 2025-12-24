@@ -1,11 +1,12 @@
 ﻿using LibrarySystem.UserIdentity.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.UserIdentity.Data
 {
     public class IdentityDbContext
-        : IdentityDbContext<User, Role, int>
+        : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public IdentityDbContext(DbContextOptions<IdentityDbContext> options)
             : base(options)

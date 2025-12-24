@@ -1,7 +1,7 @@
-﻿using System.Text;
-using System.Text.Json;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
+using System.Text.Json;
 using LibrarySystem.Logging.DTOs;
 using LibrarySystem.Logging.Services;
 
@@ -18,7 +18,11 @@ namespace LibrarySystem.Logging.Consumers
 
         public async Task StartAsync()
         {
-            var factory = new ConnectionFactory { HostName = "localhost" };
+            var factory = new ConnectionFactory
+            {
+                HostName = "localhost"
+            };
+
             var connection = await factory.CreateConnectionAsync();
             var channel = await connection.CreateChannelAsync();
 
@@ -33,17 +37,19 @@ namespace LibrarySystem.Logging.Consumers
 
             consumer.ReceivedAsync += async (_, ea) =>
             {
+                Console.WriteLine(">>> MESSAGE RECEIVED");
+
                 var json = Encoding.UTF8.GetString(ea.Body.ToArray());
 
-                if (json.Contains("\"LogLevel\":\"Request\""))
+                if (json.Contains("\"Request\""))
                 {
                     var dto = JsonSerializer.Deserialize<LogRequestDto>(json);
-                    await _mongoService.LogRequestAsync(dto);
+                    await _mongoService.SaveRequestAsync(dto!);
                 }
                 else
                 {
                     var dto = JsonSerializer.Deserialize<LogResponseDto>(json);
-                    await _mongoService.LogResponseAsync(dto);
+                    await _mongoService.SaveResponseAsync(dto!);
                 }
 
                 await channel.BasicAckAsync(ea.DeliveryTag, false);

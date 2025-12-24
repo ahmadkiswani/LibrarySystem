@@ -6,10 +6,11 @@ namespace LibrarySystem.Logging.DTOs
 {
     public class LogResponseDto
     {
-        public string CorrelationId { get; set; }
-        public string ServiceName { get; set; }
-        public string Response { get; set; }
-        public string LogLevel { get; set; } = "Response";
+        public string CorrelationId { get; set; }= null!;   
+        public string? ServiceName { get; set; }
+        public string? Response { get; set; }
+        public DateTime Time { get; set; }
+
 
     }
 }
