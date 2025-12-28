@@ -1,13 +1,15 @@
 using LibrarySystem.UserIdentity.Data;
+using LibrarySystem.UserIdentity.DTOs;
+using LibrarySystem.UserIdentity.Iinterface;
 using LibrarySystem.UserIdentity.Models;
+using LibrarySystem.UserIdentity.Seed;
 using LibrarySystem.UserIdentity.Services;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using LibrarySystem.UserIdentity.Seed;
-using LibrarySystem.UserIdentity.Iinterface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +70,21 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
     );
 });
+
+
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+    });
+});
+
+
 
 var app = builder.Build();
 app.UseCors("AllowAll");

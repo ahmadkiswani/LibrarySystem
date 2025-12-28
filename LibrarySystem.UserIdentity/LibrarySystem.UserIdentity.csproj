@@ -7,6 +7,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="MassTransit" Version="8.5.7" />
+		<PackageReference Include="MassTransit.RabbitMQ" Version="8.5.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
@@ -14,8 +16,13 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
 	</ItemGroup>
 
-</Project>
+	<!-- 🔥 هذا المهم -->
+	<ItemGroup>
+		<ProjectReference Include="..\LibrarySystem.Common\LibrarySystem.Common.csproj" />
+	</ItemGroup>
 
+</Project>

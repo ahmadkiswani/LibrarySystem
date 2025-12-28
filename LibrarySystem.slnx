@@ -12,4 +12,5 @@
   <Folder Name="/UserIdentity/">
     <Project Path="LibrarySystem.UserIdentity/LibrarySystem.UserIdentity.csproj" Id="a635ff2b-1935-4287-a8e7-cf5cdc441740" />
   </Folder>
+  <Project Path="LibrarySystem.Common/LibrarySystem.Common.csproj" Id="02cd9726-ae56-4d26-8c27-cebc0a0687d0" />
 </Solution>

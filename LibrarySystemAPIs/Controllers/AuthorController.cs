@@ -3,7 +3,10 @@ using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
 using LibrarySystem.Shared.DTOs.AuthorDtos;
 using LibrarySystem.Shared.DTOs.HelperDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace LibrarySystem.API.Controllers
 {
@@ -136,5 +139,35 @@ namespace LibrarySystem.API.Controllers
                 });
             }
         }
+        [Authorize]
+        [HttpGet("whoami")]
+        public IActionResult WhoAmI()
+        {
+            var userId = int.Parse( User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+
+            var roles = User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+
+            return Ok(new
+            {
+                userId,
+                roles
+            });
+        }
+        [Authorize]
+        [HttpGet("debug-claims")]
+        public IActionResult DebugClaims()
+        {
+            return Ok(User.Claims.Select(c => new
+            {
+                c.Type,
+                c.Value
+            }));
+        }
+
     }
+
 }

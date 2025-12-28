@@ -87,27 +87,77 @@ namespace LibrarySystem.UserIdentity.Controllers
                 );
             }
         }
-        [Authorize]
-        [HttpGet("whoami")]
-        public IActionResult WhoAmI()
+        [Authorize(Roles = "Admin")]
+        [HttpPost("deactivate")]
+        public async Task<IActionResult> Deactivate([FromBody] DeactivateUserDto dto)
         {
-            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
-                              ?? User.FindFirst("sub");
-
-            if (userIdClaim == null)
+            var validationErrors = ValidationHelper.Validate(dto);
+            if (validationErrors.Any())
             {
-                return Unauthorized(
-                    BaseResponse<string>.FailureResponse("Invalid token")
+                return BadRequest(
+                    BaseResponse<string>.FailureResponse(
+                        "Validation failed",
+                        validationErrors
+                    )
                 );
             }
 
-            return Ok(
-                BaseResponse<object>.SuccessResponse(
-                    new { UserId = int.Parse(userIdClaim.Value) },
-                    "Current user id from token"
-                )
-            );
+            try
+            {
+                await _userService.DeactivateAsync(dto);
+
+                return Ok(
+                    BaseResponse<string>.SuccessResponse(
+                        null!,
+                        "User deactivated successfully"
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(
+                    BaseResponse<string>.FailureResponse(
+                        ex.Message
+                    )
+                );
+            }
         }
+        [Authorize]
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromBody] UpdateUserDto dto)
+        {
+            var validationErrors = ValidationHelper.Validate(dto);
+            if (validationErrors.Any())
+            {
+                return BadRequest(
+                    BaseResponse<string>.FailureResponse(
+                        "Validation failed",
+                        validationErrors
+                    )
+                );
+            }
+
+            try
+            {
+                await _userService.UpdateAsync(dto);
+
+                return Ok(
+                    BaseResponse<string>.SuccessResponse(
+                        null!,
+                        "User updated successfully"
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(
+                    BaseResponse<string>.FailureResponse(ex.Message)
+                );
+            }
+        }
+      
+
+
 
     }
 }

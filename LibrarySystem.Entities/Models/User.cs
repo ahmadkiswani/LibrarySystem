@@ -5,6 +5,7 @@ namespace LibrarySystem.Entities.Models
 {
     public class User : AuditLog
     {
+
         [Required]
         public int Id { get; set; }
 
@@ -17,6 +18,7 @@ namespace LibrarySystem.Entities.Models
         public int? UserTypeId { get; set; }
         public UserType? UserType { get; set; }
 
+        public int ExternalUserId { get; set; }
 
 
         public User? CreatedByUser { get; set; }

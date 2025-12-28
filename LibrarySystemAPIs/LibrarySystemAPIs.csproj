@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Consumers\Dto\**" />
+    <Content Remove="Consumers\Dto\**" />
+    <EmbeddedResource Remove="Consumers\Dto\**" />
+    <None Remove="Consumers\Dto\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.5.7" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.7" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
@@ -19,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LibrarySystem.Common\LibrarySystem.Common.csproj" />
     <ProjectReference Include="..\LibrarySystem.Domain\LibrarySystem.Domain.csproj" />
     <ProjectReference Include="..\LibrarySystem.Entities\LibrarySystem.Entities.csproj" />
     <ProjectReference Include="..\LibrarySystem.Logging\LibrarySystem.Logging.csproj" />

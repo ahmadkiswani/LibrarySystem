@@ -6,5 +6,8 @@ namespace LibrarySystem.UserIdentity.Iinterface
     {
         Task RegisterAsync(RegisterDto dto);
         Task<AuthResponseDto> LoginAsync(LoginDto dto);
+        Task DeactivateAsync(DeactivateUserDto dto);
+        Task UpdateAsync(UpdateUserDto dto);
     }
 }
+    
