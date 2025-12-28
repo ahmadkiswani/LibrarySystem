@@ -1,33 +1,28 @@
 ﻿using LibrarySystem.Common.Messaging;
-using LibrarySystem.Domain.Data;
+using LibrarySystem.Services.Interfaces;
+using LibrarySystem.Shared.DTOs.UserDtos;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
-
 
 public class UserUpdatedConsumer : IConsumer<UserUpdatedMessage>
 {
-    private readonly LibraryDbContext _db;
+    private readonly IUserService _userService;
 
-    public UserUpdatedConsumer(LibraryDbContext db)
+    public UserUpdatedConsumer(IUserService userService)
     {
-        _db = db;
+        _userService = userService;
     }
 
     public async Task Consume(ConsumeContext<UserUpdatedMessage> context)
     {
         var msg = context.Message;
 
-        var user = await _db.Users
-            .FirstOrDefaultAsync(u => u.ExternalUserId == msg.UserId);
-
-        if (user == null)
-            return;
-
-        user.UserName = msg.UserName;
-        user.UserEmail = msg.Email;
-        user.UserTypeId = msg.UserTypeId;
-
-        await _db.SaveChangesAsync();
-
+        await _userService.ApplyUserUpdatedEvent(
+            msg.UserId,
+            new UserUpdateDto
+            {
+                UserName = msg.UserName,
+                UserEmail = msg.Email,
+                UserTypeId = msg.UserTypeId
+            });
     }
 }

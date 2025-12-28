@@ -19,39 +19,7 @@ namespace LibrarySystem.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] UserCreateDto dto)
-        {
-            var validation = ValidationHelper.ValidateDto( dto);
-            if (!validation.IsValid)
-            {
-                return BadRequest(new BaseResponse<object>
-                {
-                    Success = false,
-                    Message = "Validation failed",
-                    Errors = validation.Errors
-                });
-            }
-
-            try
-            {
-                await _service.AddUser(dto);
-
-                return Ok(new BaseResponse<object>
-                {
-                    Success = true,
-                    Message = "User added successfully"
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new BaseResponse<object>
-                {
-                    Success = false,
-                    Message = ex.Message
-                });
-            }
-        }
-
+     
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -89,63 +57,9 @@ namespace LibrarySystem.API.Controllers
         }
 
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(int id, [FromBody] UserUpdateDto dto)
-        {
-            var validation = ValidationHelper.ValidateDto( dto);
-            if (!validation.IsValid)
-            {
-                return BadRequest(new BaseResponse<object>
-                {
-                    Success = false,
-                    Message = "Validation failed",
-                    Errors = validation.Errors
-                });
-            }
+       
 
-            try
-            {
-                await _service.EditUser(id, dto);
-
-                return Ok(new BaseResponse<object>
-                {
-                    Success = true,
-                    Message = "User updated successfully"
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new BaseResponse<object>
-                {
-                    Success = false,
-                    Message = ex.Message
-                });
-            }
-        }
-
-        [HttpPut("delete/{id}")]
-        public async Task<IActionResult> DeleteUser(int id, [FromBody] UserDeleteDto dto)
-        {
-            try
-            {
-                await _service.DeleteUser(id, dto);
-
-                return Ok(new BaseResponse<object>
-                {
-                    Success = true,
-                    Message = "User deleted successfully"
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new BaseResponse<object>
-                {
-                    Success = false,
-                    Message = ex.Message
-                });
-            }
-        }
-
+     
 
     }
 }

@@ -19,31 +19,20 @@ namespace LibrarySystem.Services
 			_userRepo = userRepo;
 			_userTypeRepo = userTypeRepo;
 		}
-  
 
 
-		public async Task AddUser(UserCreateDto dto)
+
+		public async Task ApplyUserCreatedEvent(UserCreateDto dto)
 		{
-			bool emailExists = await _userRepo.GetQueryable()
-				.AnyAsync(u => u.UserEmail == dto.UserEmail);
+			var exists = await _userRepo.GetQueryable()
+				.AnyAsync(u => u.ExternalUserId == dto.ExternalUserId);
 
-			if (emailExists)
-				throw new Exception("Email already exists");
-
-			bool usernameExists = await _userRepo.GetQueryable()
-				.AnyAsync(u => u.UserName == dto.UserName);
-
-			if (usernameExists)
-				throw new Exception("Username already exists");
-
-			bool typeExists = await _userTypeRepo.GetQueryable()
-				.AnyAsync(t => t.Id == dto.UserTypeId);
-
-			if (!typeExists)
-				throw new Exception("UserType does not exist");
+			if (exists)
+				return;
 
 			var user = new User
 			{
+				ExternalUserId = dto.ExternalUserId,
 				UserName = dto.UserName,
 				UserEmail = dto.UserEmail,
 				UserTypeId = dto.UserTypeId
@@ -53,41 +42,15 @@ namespace LibrarySystem.Services
 			await _userRepo.SaveAsync();
 		}
 
-  
-		public async Task EditUser(int id, UserUpdateDto dto)
+
+
+		public async Task ApplyUserUpdatedEvent(int externalUserId, UserUpdateDto dto)
 		{
-			var user = await _userRepo.GetByIdAsync(id);
+			var user = await _userRepo.GetQueryable()
+				.FirstOrDefaultAsync(u => u.ExternalUserId == externalUserId);
+
 			if (user == null)
-				throw new Exception("User not found");
-
-			bool emailExists = await _userRepo.GetQueryable()
-				.AnyAsync(u => u.UserEmail == dto.UserEmail && u.Id != id);
-
-			if (emailExists)
-				throw new Exception("Email already exists for another user");
-
-			bool usernameExists = await _userRepo.GetQueryable()
-				.AnyAsync(u => u.UserName == dto.UserName && u.Id != id);
-
-			if (usernameExists)
-				throw new Exception("Username already exists for another user");
-
-			bool typeExists = await _userTypeRepo.GetQueryable()
-				.AnyAsync(t => t.Id == dto.UserTypeId);
-
-			if (!typeExists)
-				throw new Exception("UserType does not exist");
-
-		
-
-			if (user.UserTypeId == 1 && dto.UserTypeId != 1)
-			{
-				int adminCount = await _userRepo.GetQueryable()
-					.CountAsync(u => u.UserTypeId == 1);
-
-				if (adminCount == 1)
-					throw new Exception("Cannot remove the last admin");
-			}
+				return;
 
 			user.UserName = dto.UserName;
 			user.UserEmail = dto.UserEmail;
@@ -98,25 +61,18 @@ namespace LibrarySystem.Services
 		}
 
 
-		public async Task DeleteUser(int id, UserDeleteDto dto)
+		public async Task ApplyUserDeactivatedEvent(int externalUserId)
 		{
-			var user = await _userRepo.GetByIdAsync(id);
+			var user = await _userRepo.GetQueryable()
+				.FirstOrDefaultAsync(u => u.ExternalUserId == externalUserId);
 
 			if (user == null)
-				throw new Exception("User not found");
-
-			if (user.UserTypeId == 1)
-			{
-				int adminCount = await _userRepo.GetQueryable()
-					.CountAsync(u => u.UserTypeId == 1);
-
-				if (adminCount == 1)
-					throw new Exception("Cannot delete the last admin");
-			}
+				return;
 
 			await _userRepo.SoftDeleteAsync(user);
 			await _userRepo.SaveAsync();
 		}
+
 
 
 		public async Task<List<UserListDto>> ListUsers()

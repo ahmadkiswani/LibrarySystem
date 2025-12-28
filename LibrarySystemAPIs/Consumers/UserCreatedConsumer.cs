@@ -1,39 +1,27 @@
 ﻿using LibrarySystem.Common.Messaging;
-using LibrarySystem.Domain.Data; 
-using LibrarySystem.Entities.Models;
+using LibrarySystem.Services.Interfaces;
+using LibrarySystem.Shared.DTOs.UserDtos;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 
 public class UserCreatedConsumer : IConsumer<UserCreatedMessage>
 {
-    private readonly LibraryDbContext _db;
+    private readonly IUserService _userService;
 
-    public UserCreatedConsumer(LibraryDbContext db)
+    public UserCreatedConsumer(IUserService userService)
     {
-        _db = db;
+        _userService = userService;
     }
 
     public async Task Consume(ConsumeContext<UserCreatedMessage> context)
     {
         var msg = context.Message;
 
-        var exists = await _db.Users
-            .AnyAsync(u => u.ExternalUserId == msg.UserId);
-
-        if (exists)
-            return;
-
-        var user = new User
+        await _userService.ApplyUserCreatedEvent(new UserCreateDto
         {
             ExternalUserId = msg.UserId,
             UserName = msg.UserName,
             UserEmail = msg.Email,
             UserTypeId = msg.UserTypeId
-        };
-
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
-
-        Console.WriteLine($"✅ User mirrored in Library DB: {user.UserName}");
+        });
     }
 }

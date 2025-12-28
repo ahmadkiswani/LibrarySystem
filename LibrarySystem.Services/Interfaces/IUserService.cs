@@ -5,11 +5,12 @@ namespace LibrarySystem.Services.Interfaces
 {
     public interface IUserService
     {
-        Task AddUser(UserCreateDto dto);
-        Task EditUser(int id, UserUpdateDto dto);
-        Task DeleteUser(int id,UserDeleteDto dto);
+    
         Task<List<UserListDto>> ListUsers();
         Task<UserDetailsDto> GetUserDetails(int id);
+        Task ApplyUserCreatedEvent(UserCreateDto dto);
+        Task ApplyUserUpdatedEvent(int externalUserId, UserUpdateDto dto);
+        Task ApplyUserDeactivatedEvent(int externalUserId);
 
     }
 }
