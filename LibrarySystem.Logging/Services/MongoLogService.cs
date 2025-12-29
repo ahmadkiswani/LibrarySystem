@@ -8,17 +8,26 @@ namespace LibrarySystem.Logging.Services
 {
     public class MongoLogService
     {
-        private readonly IMongoCollection<HttpLog> _httpLogs;
-        private readonly IMongoCollection<ExceptionLog> _exceptionLogs;
+        private readonly IMongoCollection<HttpLog> _httpLogsLibrary;
+        private readonly IMongoCollection<HttpLog> _httpLogsIdentity;
+
+        private readonly IMongoCollection<ExceptionLog> _exceptionLogsLibrary;
+        private readonly IMongoCollection<ExceptionLog> _exceptionLogsIdentity;
 
         public MongoLogService(IOptions<MongoSettings> settings)
         {
             var client = new MongoClient(settings.Value.ConnectionString);
             var db = client.GetDatabase(settings.Value.DatabaseName);
 
-            _httpLogs = db.GetCollection<HttpLog>(settings.Value.HttpLogsCollection);
-            _exceptionLogs = db.GetCollection<ExceptionLog>(settings.Value.ExceptionLogsCollection);
+            _httpLogsLibrary = db.GetCollection<HttpLog>(settings.Value.HttpLogsLibraryCollection);
+            _httpLogsIdentity = db.GetCollection<HttpLog>(settings.Value.HttpLogsIdentityCollection);
+
+            _exceptionLogsLibrary = db.GetCollection<ExceptionLog>(settings.Value.ExceptionLogsLibraryCollection);
+            _exceptionLogsIdentity = db.GetCollection<ExceptionLog>(settings.Value.ExceptionLogsIdentityCollection);
         }
+
+        private bool IsIdentity(string? serviceName)
+            => string.Equals(serviceName, "UserIdentity.API", StringComparison.OrdinalIgnoreCase);
 
         public async Task SaveRequestAsync(LogRequestDto dto)
         {
@@ -31,7 +40,10 @@ namespace LibrarySystem.Logging.Services
                 LogLevel = "Request"
             };
 
-            await _httpLogs.InsertOneAsync(log);
+            if (IsIdentity(dto.ServiceName))
+                await _httpLogsIdentity.InsertOneAsync(log);
+            else
+                await _httpLogsLibrary.InsertOneAsync(log);
         }
 
         public async Task SaveResponseAsync(LogResponseDto dto)
@@ -40,12 +52,15 @@ namespace LibrarySystem.Logging.Services
             {
                 CorrelationId = dto.CorrelationId,
                 Time = dto.Time,
-                ServiceName =dto.ServiceName,
+                ServiceName = dto.ServiceName,
                 Response = dto.Response,
                 LogLevel = "Response"
             };
 
-            await _httpLogs.InsertOneAsync(log);
+            if (IsIdentity(dto.ServiceName))
+                await _httpLogsIdentity.InsertOneAsync(log);
+            else
+                await _httpLogsLibrary.InsertOneAsync(log);
         }
 
         public async Task SaveExceptionAsync(LogExceptionDto dto)
@@ -56,13 +71,15 @@ namespace LibrarySystem.Logging.Services
                 Time = dto.Time,
                 ServiceName = dto.ServiceName,
                 Message = dto.Message,
-                StackTrace = dto.StackTrace,
                 Request = dto.Request,
                 Response = dto.Response,
-
             };
 
-            await _exceptionLogs.InsertOneAsync(log);
+            if (IsIdentity(dto.ServiceName))
+                await _exceptionLogsIdentity.InsertOneAsync(log);
+            else
+                await _exceptionLogsLibrary.InsertOneAsync(log);
         }
+
     }
 }

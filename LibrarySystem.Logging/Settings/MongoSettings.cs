@@ -8,8 +8,13 @@ namespace LibrarySystem.Logging.Settings
     {
         public string ConnectionString { get; set; } = null!;
         public string DatabaseName { get; set; } = null!;
-        public string HttpLogsCollection { get; set; } = null!;
-        public string ExceptionLogsCollection { get; set; } = null!;
+        public string HttpLogsLibraryCollection { get; set; } = null!;
+        public string HttpLogsIdentityCollection { get; set; } = null!;
+
+        public string ExceptionLogsLibraryCollection { get; set; } = null!;
+        public string ExceptionLogsIdentityCollection { get; set; } = null!;
+
+
     }
 }
 

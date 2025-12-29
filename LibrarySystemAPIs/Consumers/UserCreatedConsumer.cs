@@ -1,4 +1,5 @@
 ﻿using LibrarySystem.Common.Messaging;
+using LibrarySystem.LibraryManagement.Helpers;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.UserDtos;
 using MassTransit;
@@ -21,7 +22,7 @@ public class UserCreatedConsumer : IConsumer<UserCreatedMessage>
             ExternalUserId = msg.UserId,
             UserName = msg.UserName,
             UserEmail = msg.Email,
-            UserTypeId = msg.UserTypeId
+            UserTypeId = msg.UserTypeId,
         });
     }
 }

@@ -1,28 +1,27 @@
-﻿using LibrarySystem.Logging.DTOs;
-using LibrarySystem.Logging.Interfaces;
+﻿using LibrarySystem.Common.Messaging;
+using MassTransit;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
 using System.Text;
 
-namespace LibrarySystem.API.Middleware
+namespace LibrarySystem.Common.Middleware
 {
     public class LoggingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly string _serviceName;
 
-        public LoggingMiddleware(RequestDelegate next)
+        public LoggingMiddleware(RequestDelegate next, string serviceName)
         {
             _next = next;
+            _serviceName = serviceName;
         }
 
-        public async Task InvokeAsync(
-            HttpContext context,
-            ILogEventPublisher publisher)
+        public async Task InvokeAsync(HttpContext context, IPublishEndpoint publishEndpoint)
         {
             var correlationId = Guid.NewGuid().ToString();
-            var serviceName = "LibrarySystem.API";
-
             context.Items["CorrelationId"] = correlationId;
 
-         
             context.Request.EnableBuffering();
 
             string requestBody = string.Empty;
@@ -40,7 +39,6 @@ namespace LibrarySystem.API.Middleware
             var requestText =
                 $"{context.Request.Method} {context.Request.Path} {requestBody}";
 
-           
             var originalBody = context.Response.Body;
             using var responseBody = new MemoryStream();
             context.Response.Body = responseBody;
@@ -52,57 +50,56 @@ namespace LibrarySystem.API.Middleware
                 responseBody.Position = 0;
                 var responseText = await new StreamReader(responseBody).ReadToEndAsync();
 
-             
                 bool isLogicalError =
                     context.Response.StatusCode >= 400 ||
                     responseText.Contains("\"success\":false");
 
                 if (isLogicalError)
                 {
-                    await publisher.PublishExceptionAsync(new LogExceptionDto
+                    await publishEndpoint.Publish(new LogExceptionMessage
                     {
                         CorrelationId = correlationId,
                         Time = DateTime.UtcNow,
-                        ServiceName = serviceName,
+                        ServiceName = _serviceName,
+                        Message = "Logical / Business error",
                         Request = requestText,
                         Response = responseText,
-                        Message = "Logical / Business error"
+                        ErrorType = "Business"
                     });
                 }
                 else
                 {
-                    await publisher.PublishRequestAsync(new LogRequestDto
+                    await publishEndpoint.Publish(new LogRequestMessage
                     {
                         CorrelationId = correlationId,
                         Time = DateTime.UtcNow,
-                        ServiceName = serviceName,
+                        ServiceName = _serviceName,
                         Request = requestText
                     });
 
-                    await publisher.PublishResponseAsync(new LogResponseDto
+                    await publishEndpoint.Publish(new LogResponseMessage
                     {
                         CorrelationId = correlationId,
                         Time = DateTime.UtcNow,
-                        ServiceName = serviceName,
+                        ServiceName = _serviceName,
                         Response = responseText
                     });
                 }
 
-             
                 responseBody.Position = 0;
                 await responseBody.CopyToAsync(originalBody);
             }
             catch (Exception ex)
             {
-             
-                await publisher.PublishExceptionAsync(new LogExceptionDto
+                await publishEndpoint.Publish(new LogExceptionMessage
                 {
                     CorrelationId = correlationId,
                     Time = DateTime.UtcNow,
-                    ServiceName = serviceName,
-                    Request = requestText,
+                    ServiceName = _serviceName,
                     Message = ex.Message,
-                    StackTrace = ex.StackTrace
+                    StackTrace = ex.StackTrace,
+                    Request = requestText,
+                    ErrorType = "Exception"
                 });
 
                 context.Response.Body = originalBody;

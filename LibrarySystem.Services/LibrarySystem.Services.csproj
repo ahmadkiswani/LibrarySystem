@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LibrarySystem.Common\LibrarySystem.Common.csproj" />
     <ProjectReference Include="..\LibrarySystem.Domain\LibrarySystem.Domain.csproj" />
     <ProjectReference Include="..\LibrarySystem.Entities\LibrarySystem.Entities.csproj" />
     <ProjectReference Include="..\LibrarySystem.Shared\LibrarySystem.Shared.csproj" />

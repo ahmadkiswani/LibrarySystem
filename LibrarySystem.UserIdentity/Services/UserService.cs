@@ -75,7 +75,7 @@ public class UserService : IUserService
         return new AuthResponseDto
         {
             UserId = user.Id,
-            UserName = user.UserName ?? "",
+            UserName = user.UserName,
             Token = token,
             Roles = roles.ToList()
         };

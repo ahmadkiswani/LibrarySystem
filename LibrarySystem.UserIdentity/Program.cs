@@ -1,5 +1,4 @@
 using LibrarySystem.UserIdentity.Data;
-using LibrarySystem.UserIdentity.DTOs;
 using LibrarySystem.UserIdentity.Iinterface;
 using LibrarySystem.UserIdentity.Models;
 using LibrarySystem.UserIdentity.Seed;
@@ -10,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using LibrarySystem.Common.Middleware;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,7 +94,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
+app.UseMiddleware<LoggingMiddleware>("UserIdentity.API");
 app.UseAuthentication(); 
 app.UseAuthorization();
 
