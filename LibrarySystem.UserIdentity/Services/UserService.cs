@@ -1,8 +1,8 @@
 ﻿using LibrarySystem.UserIdentity.DTOs;
 using LibrarySystem.UserIdentity.Iinterface;
 using LibrarySystem.UserIdentity.Models;
-using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using MassTransit;
 using LibrarySystem.Common.Messaging;
 
 namespace LibrarySystem.UserIdentity.Services;
@@ -12,19 +12,18 @@ public class UserService : IUserService
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ITokenService _tokenService;
-
-    private readonly ISendEndpointProvider _sendEndpointProvider;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public UserService(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         ITokenService tokenService,
-        ISendEndpointProvider sendEndpointProvider)
+        IPublishEndpoint publishEndpoint)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _tokenService = tokenService;
-        _sendEndpointProvider = sendEndpointProvider;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task RegisterAsync(RegisterDto dto)
@@ -42,17 +41,16 @@ public class UserService : IUserService
 
         await _userManager.AddToRoleAsync(user, "User");
 
-        var endpoint = await _sendEndpointProvider.GetSendEndpoint(
-            new Uri($"queue:{LibraryQueues.UserCreated}")
-        );
-
-        await endpoint.Send(new UserCreatedMessage
+        await _publishEndpoint.Publish(new UserCreatedMessage
         {
             UserId = user.Id,
             UserName = user.UserName!,
             Email = user.Email!,
             UserTypeId = user.UserTypeId,
             OccurredAt = DateTime.UtcNow
+        }, ctx =>
+        {
+            ctx.SetRoutingKey(LibraryRoutingKeys.UserCreated);
         });
     }
 
@@ -75,11 +73,12 @@ public class UserService : IUserService
         return new AuthResponseDto
         {
             UserId = user.Id,
-            UserName = user.UserName,
+            UserName = user.UserName ?? string.Empty,
             Token = token,
             Roles = roles.ToList()
         };
     }
+
     public async Task UpdateAsync(UpdateUserDto dto)
     {
         var user = await _userManager.FindByIdAsync(dto.UserId.ToString())
@@ -91,21 +90,18 @@ public class UserService : IUserService
 
         await _userManager.UpdateAsync(user);
 
-        var endpoint = await _sendEndpointProvider.GetSendEndpoint(
-            new Uri($"queue:{LibraryQueues.UserUpdated}")
-        );
-
-        await endpoint.Send(new UserUpdatedMessage
+        await _publishEndpoint.Publish(new UserUpdatedMessage
         {
-            UserId = user.Id,                
+            UserId = user.Id,
             UserName = user.UserName!,
             Email = user.Email!,
             UserTypeId = user.UserTypeId,
             OccurredAt = DateTime.UtcNow
+        }, ctx =>
+        {
+            ctx.SetRoutingKey(LibraryRoutingKeys.UserUpdated);
         });
     }
-
-
 
     public async Task DeactivateAsync(DeactivateUserDto dto)
     {
@@ -115,15 +111,13 @@ public class UserService : IUserService
         user.IsArchived = true;
         await _userManager.UpdateAsync(user);
 
-        var endpoint = await _sendEndpointProvider.GetSendEndpoint(
-            new Uri($"queue:{LibraryQueues.UserDeactivated}")
-        );
-
-        await endpoint.Send(new UserDeactivatedMessage
+        await _publishEndpoint.Publish(new UserDeactivatedMessage
         {
             UserId = user.Id,
             OccurredAt = DateTime.UtcNow
+        }, ctx =>
+        {
+            ctx.SetRoutingKey(LibraryRoutingKeys.UserDeactivated);
         });
     }
-
 }

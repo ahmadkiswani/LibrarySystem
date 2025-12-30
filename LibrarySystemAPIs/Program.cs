@@ -4,16 +4,16 @@ using LibrarySystem.Domain.Repositories;
 using LibrarySystem.Services;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.HelperDto;
+using LibrarySystem.Common.Middleware;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using LibrarySystem.Common.Middleware;
-
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -26,59 +26,63 @@ builder.Services.AddControllers()
                 .Select(e => e.ErrorMessage)
                 .ToList();
 
-            var response = new BaseResponse<object>
-            {
-                Success = false,
-                Message = "Validation failed",
-                Errors = errors
-            };
-
-            return new BadRequestObjectResult(response);
+            return new BadRequestObjectResult(
+                new BaseResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = errors
+                });
         };
     });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);
 
-builder.Services
-    .AddAuthentication(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = true,
-            ValidIssuer = jwtSection["Issuer"],
-            ValidateAudience = true,
-            ValidAudience = jwtSection["Audience"],
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSection["Issuer"],
+        ValidateAudience = true,
+        ValidAudience = jwtSection["Audience"],
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 builder.Services.AddAuthorization();
+
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-    {
         policy.AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowAnyOrigin();
-    });
+              .AllowAnyOrigin());
 });
+
+
+var rabbitSection = builder.Configuration.GetSection("RabbitMq");
+if (!rabbitSection.Exists())
+    throw new Exception("RabbitMq configuration section is missing");
 
 builder.Services.AddMassTransit(x =>
 {
@@ -88,24 +92,43 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("localhost", "/", h =>
+        cfg.Host(rabbitSection["Host"], "/", h =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            h.Username(rabbitSection["Username"]);
+            h.Password(rabbitSection["Password"]);
+
         });
 
         cfg.ReceiveEndpoint(LibraryQueues.UserCreated, e =>
         {
+            e.Bind(LibraryExchanges.Users, s =>
+            {
+                s.RoutingKey = LibraryRoutingKeys.UserCreated;
+                s.ExchangeType = "topic";
+            });
+
             e.ConfigureConsumer<UserCreatedConsumer>(context);
         });
 
         cfg.ReceiveEndpoint(LibraryQueues.UserUpdated, e =>
         {
+            e.Bind(LibraryExchanges.Users, s =>
+            {
+                s.RoutingKey = LibraryRoutingKeys.UserUpdated;
+                s.ExchangeType = "topic";
+            });
+
             e.ConfigureConsumer<UserUpdatedConsumer>(context);
         });
 
         cfg.ReceiveEndpoint(LibraryQueues.UserDeactivated, e =>
         {
+            e.Bind(LibraryExchanges.Users, s =>
+            {
+                s.RoutingKey = LibraryRoutingKeys.UserDeactivated;
+                s.ExchangeType = "topic";
+            });
+
             e.ConfigureConsumer<UserDeactivatedConsumer>(context);
         });
     });
@@ -120,6 +143,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -133,5 +157,4 @@ app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>("LibrarySystem.API");
 
 app.MapControllers();
-
 app.Run();

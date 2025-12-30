@@ -21,7 +21,6 @@ namespace LibrarySystem.Logging.Services
 
             _httpLogsLibrary = db.GetCollection<HttpLog>(settings.Value.HttpLogsLibraryCollection);
             _httpLogsIdentity = db.GetCollection<HttpLog>(settings.Value.HttpLogsIdentityCollection);
-
             _exceptionLogsLibrary = db.GetCollection<ExceptionLog>(settings.Value.ExceptionLogsLibraryCollection);
             _exceptionLogsIdentity = db.GetCollection<ExceptionLog>(settings.Value.ExceptionLogsIdentityCollection);
         }
@@ -35,8 +34,8 @@ namespace LibrarySystem.Logging.Services
             {
                 CorrelationId = dto.CorrelationId,
                 Time = dto.Time,
-                ServiceName = dto.ServiceName,
-                Request = dto.Request,
+                ServiceName = dto.ServiceName ?? string.Empty,
+                Request = dto.Request ?? string.Empty,
                 LogLevel = "Request"
             };
 
@@ -52,8 +51,8 @@ namespace LibrarySystem.Logging.Services
             {
                 CorrelationId = dto.CorrelationId,
                 Time = dto.Time,
-                ServiceName = dto.ServiceName,
-                Response = dto.Response,
+                ServiceName = dto.ServiceName ?? string.Empty,
+                Response = dto.Response ?? string.Empty,
                 LogLevel = "Response"
             };
 

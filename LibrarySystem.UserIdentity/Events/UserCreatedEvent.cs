@@ -1,4 +1,4 @@
-﻿namespace LibrarySystem.UserIdentity.Messaging.Events;
+﻿namespace LibrarySystem.UserIdentity.Messaging;
 
 public record UserCreatedEvent(
     int UserId,

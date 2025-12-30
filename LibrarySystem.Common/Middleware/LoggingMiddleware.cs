@@ -35,7 +35,6 @@ namespace LibrarySystem.Common.Middleware
                 requestBody = await reader.ReadToEndAsync();
                 context.Request.Body.Position = 0;
             }
-
             var requestText =
                 $"{context.Request.Method} {context.Request.Path} {requestBody}";
 
