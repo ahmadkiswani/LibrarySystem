@@ -1,52 +1,38 @@
-﻿using LibrarySystem.Logging.DTOs;
+﻿using LibrarySystem.Common.LibraryQueues;
+using LibrarySystem.Logging.DTOs;
 using LibrarySystem.Logging.Interfaces;
-using RabbitMQ.Client;
-using System.Text;
-using System.Text.Json;
+using MassTransit;
 
-namespace LibrarySystem.Logging.Services
+public class RabbitMqLogEventPublisher : ILogEventPublisher
 {
-    public class RabbitMqLogEventPublisher : ILogEventPublisher
+    private readonly ISendEndpointProvider _sendEndpointProvider;
+
+    public RabbitMqLogEventPublisher(ISendEndpointProvider sendEndpointProvider)
     {
-        private readonly IConnection _connection;
+        _sendEndpointProvider = sendEndpointProvider;
+    }
 
-        public RabbitMqLogEventPublisher()
-        {
-            var factory = new ConnectionFactory
-            {
-                HostName = "localhost"
-            };
+    public async Task PublishRequestAsync(LogRequestDto dto)
+    {
+        var endpoint = await _sendEndpointProvider
+            .GetSendEndpoint(new Uri($"queue:{LoggingQueues.RequestResponse}"));
 
-            _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
-        }
+        await endpoint.Send(dto);
+    }
 
-        public Task PublishRequestAsync(LogRequestDto dto)
-            => PublishAsync("request-response-queue", dto);
+    public async Task PublishResponseAsync(LogResponseDto dto)
+    {
+        var endpoint = await _sendEndpointProvider
+            .GetSendEndpoint(new Uri($"queue:{LoggingQueues.RequestResponse}"));
 
-        public Task PublishResponseAsync(LogResponseDto dto)
-            => PublishAsync("request-response-queue", dto);
+        await endpoint.Send(dto);
+    }
 
-        public Task PublishExceptionAsync(LogExceptionDto dto)
-            => PublishAsync("exceptions-queue", dto);
+    public async Task PublishExceptionAsync(LogExceptionDto dto)
+    {
+        var endpoint = await _sendEndpointProvider
+            .GetSendEndpoint(new Uri($"queue:{LoggingQueues.Exceptions}"));
 
-        private async Task PublishAsync(string queueName, object message)
-        {
-            await using var channel = await _connection.CreateChannelAsync();
-
-            await channel.QueueDeclareAsync(
-                queue: queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false
-            );
-
-            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
-
-            await channel.BasicPublishAsync(
-                exchange: "",
-                routingKey: queueName,
-                body: body
-            );
-        }
+        await endpoint.Send(dto);
     }
 }
