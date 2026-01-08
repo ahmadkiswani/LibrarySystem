@@ -8,5 +8,7 @@ namespace LibrarySystem.Services.Interfaces
         Task BorrowBook(BorrowCreateDto dto);
         Task ReturnBook(BorrowReturnDto dto);
         Task<List<Borrow>> Search(BorrowSearchDto dto);
+        Task MarkOverdueAsync(int borrowId);
+
     }
 }

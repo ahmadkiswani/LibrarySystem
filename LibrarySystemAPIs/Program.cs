@@ -1,10 +1,10 @@
 using LibrarySystem.Common.Messaging;
+using LibrarySystem.Common.Middleware;
 using LibrarySystem.Domain.Data;
 using LibrarySystem.Domain.Repositories;
 using LibrarySystem.Services;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.HelperDto;
-using LibrarySystem.Common.Middleware;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -158,3 +158,18 @@ app.UseMiddleware<LoggingMiddleware>("LibrarySystem.API");
 
 app.MapControllers();
 app.Run();
+
+
+public class BorrowOverdueBackgroundService : BackgroundService
+{
+    private readonly IServiceScopeFactory _scopeFactory;
+    public BorrowOverdueBackgroundService(IServiceScopeFactory scopeFactory)
+    {
+        _scopeFactory = scopeFactory;
+    }
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        return Task.CompletedTask;
+    }
+}

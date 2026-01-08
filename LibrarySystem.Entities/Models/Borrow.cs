@@ -17,7 +17,8 @@ namespace LibrarySystem.Entities.Models
         public DateTime BorrowDate { get; set; }
         public DateTime? ReturnDate { get; set; }
         public DateTime DueDate { get; set; }
-        public bool IsOverdue { get; set; } = false;
+        public BorrowStatus Status { get; set; } = BorrowStatus.Borrowed;
+
         public int? OverdueDays { get; set; } = 0;
 
     }

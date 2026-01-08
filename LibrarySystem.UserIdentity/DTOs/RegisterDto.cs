@@ -13,7 +13,5 @@ namespace LibrarySystem.UserIdentity.DTOs
         [Required(ErrorMessage = "Username is required")]
         public string UserName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "UserTypeId is required")]
-        public int UserTypeId { get; set; }
     }
 }

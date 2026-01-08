@@ -35,7 +35,6 @@ namespace LibrarySystem.Services
                 ExternalUserId = dto.ExternalUserId,
                 UserName = dto.UserName,
                 UserEmail = dto.UserEmail,
-                UserTypeId = dto.UserTypeId,
             };
 
             await _userRepo.AddAsync(user);
@@ -54,7 +53,6 @@ namespace LibrarySystem.Services
 
             user.UserName = dto.UserName;
             user.UserEmail = dto.UserEmail;
-            user.UserTypeId = dto.UserTypeId;
 
             await _userRepo.UpdateAsync(user);
             await _userRepo.SaveAsync();
@@ -83,7 +81,6 @@ namespace LibrarySystem.Services
             {
                 Id = u.Id,
                 UserName = u.UserName,
-                UserTypeId = u.UserTypeId,
                 UserTypeName = u.UserType != null ? u.UserType.TypeName : "Unknown"
             }).ToList();
         }

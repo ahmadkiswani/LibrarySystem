@@ -22,7 +22,6 @@ public class UserUpdatedConsumer : IConsumer<UserUpdatedMessage>
             {
                 UserName = msg.UserName,
                 UserEmail = msg.Email,
-                UserTypeId = msg.UserTypeId
             });
     }
 }

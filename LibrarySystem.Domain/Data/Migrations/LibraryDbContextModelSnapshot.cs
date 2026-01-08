@@ -221,9 +221,6 @@ namespace LibrarySystem.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsOverdue")
-                        .HasColumnType("bit");
-
                     b.Property<int?>("LastModifiedBy")
                         .HasColumnType("int");
 
@@ -235,6 +232,9 @@ namespace LibrarySystem.Migrations
 
                     b.Property<DateTime?>("ReturnDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");

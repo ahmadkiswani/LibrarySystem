@@ -1,7 +1,9 @@
-﻿using LibrarySystem.Domain.Repositories;
+﻿using LibrarySystem.Common.Events;
+using LibrarySystem.Domain.Repositories;
 using LibrarySystem.Entities.Models;
 using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Services
@@ -9,10 +11,14 @@ namespace LibrarySystem.Services
     public class CategoryService : ICategoryService
     {
         private readonly IGenericRepository<Category> _categoryRepo;
+        private readonly IPublishEndpoint _publish;
 
-        public CategoryService(IGenericRepository<Category> categoryRepo)
+        public CategoryService(
+            IGenericRepository<Category> categoryRepo,
+            IPublishEndpoint publish)
         {
             _categoryRepo = categoryRepo;
+            _publish = publish;
         }
 
         public async Task AddCategory(CategoryCreateDto dto)
@@ -30,6 +36,14 @@ namespace LibrarySystem.Services
 
             await _categoryRepo.AddAsync(category);
             await _categoryRepo.SaveAsync();
+
+            await _publish.Publish(new CategoryUpsertedEvent
+            {
+                EventId = Guid.NewGuid(),
+                OccurredAt = DateTime.UtcNow,
+                CategoryId = category.Id,
+                CategoryName = category.Name
+            }, ctx => ctx.SetRoutingKey("category.upserted"));
         }
 
         public async Task EditCategory(int id, CategoryUpdateDto dto)
@@ -42,6 +56,14 @@ namespace LibrarySystem.Services
 
             await _categoryRepo.UpdateAsync(category);
             await _categoryRepo.SaveAsync();
+
+            await _publish.Publish(new CategoryUpsertedEvent
+            {
+                EventId = Guid.NewGuid(),
+                OccurredAt = DateTime.UtcNow,
+                CategoryId = category.Id,
+                CategoryName = category.Name
+            }, ctx => ctx.SetRoutingKey("category.upserted"));
         }
 
         public async Task DeleteCategory(int id)
@@ -52,6 +74,8 @@ namespace LibrarySystem.Services
 
             await _categoryRepo.SoftDeleteAsync(category);
             await _categoryRepo.SaveAsync();
+
+        
         }
 
         public async Task<List<CategoryListDto>> ListCategories()

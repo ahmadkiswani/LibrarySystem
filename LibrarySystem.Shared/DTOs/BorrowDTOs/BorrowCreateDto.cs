@@ -12,8 +12,8 @@ namespace LibrarySystem.Shared.DTOs.BorrowDTOs
 
         [Required]
         public int BookCopyId { get; set; }
-    }
 
+    }
 }
 
 

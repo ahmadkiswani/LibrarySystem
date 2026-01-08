@@ -9,3 +9,4 @@ namespace LibrarySystem.Logging.Interfaces
         Task PublishExceptionAsync(LogExceptionDto dto);
     }
 }
+//cqrs

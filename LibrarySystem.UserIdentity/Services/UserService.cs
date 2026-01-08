@@ -32,7 +32,6 @@ public class UserService : IUserService
         {
             UserName = dto.UserName,
             Email = dto.Email,
-            UserTypeId = dto.UserTypeId
         };
 
         var result = await _userManager.CreateAsync(user, dto.Password);
@@ -46,7 +45,6 @@ public class UserService : IUserService
             UserId = user.Id,
             UserName = user.UserName!,
             Email = user.Email!,
-            UserTypeId = user.UserTypeId,
             OccurredAt = DateTime.UtcNow
         }, ctx =>
         {
@@ -68,7 +66,7 @@ public class UserService : IUserService
             throw new UnauthorizedAccessException("Invalid credentials");
 
         var roles = await _userManager.GetRolesAsync(user);
-        var token = _tokenService.GenerateAccessToken(user, roles);
+        var token = await _tokenService.GenerateAccessToken(user, roles);
 
         return new AuthResponseDto
         {
@@ -86,7 +84,6 @@ public class UserService : IUserService
 
         user.UserName = dto.UserName;
         user.Email = dto.Email;
-        user.UserTypeId = dto.UserTypeId;
 
         await _userManager.UpdateAsync(user);
 
@@ -95,7 +92,6 @@ public class UserService : IUserService
             UserId = user.Id,
             UserName = user.UserName!,
             Email = user.Email!,
-            UserTypeId = user.UserTypeId,
             OccurredAt = DateTime.UtcNow
         }, ctx =>
         {

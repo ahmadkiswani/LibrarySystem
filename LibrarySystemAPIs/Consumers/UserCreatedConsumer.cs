@@ -22,7 +22,6 @@ public class UserCreatedConsumer : IConsumer<UserCreatedMessage>
             ExternalUserId = msg.UserId,
             UserName = msg.UserName,
             UserEmail = msg.Email,
-            UserTypeId = msg.UserTypeId,
         });
     }
 }

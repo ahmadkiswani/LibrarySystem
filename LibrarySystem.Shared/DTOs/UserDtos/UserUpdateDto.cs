@@ -18,7 +18,6 @@ namespace LibrarySystem.Shared.DTOs.UserDtos
         [StringLength(120)]
         public string UserEmail { get; set; } = string.Empty;
 
-        public int? UserTypeId { get; set; }
     }
 
 }

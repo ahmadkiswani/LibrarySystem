@@ -1,78 +1,94 @@
-using LibrarySystem.UserIdentity.Data;
-using LibrarySystem.UserIdentity.Iinterface;
-using LibrarySystem.UserIdentity.Models;
-using LibrarySystem.UserIdentity.Seed;
-using LibrarySystem.UserIdentity.Services;
-using LibrarySystem.Common.Middleware;
-using LibrarySystem.Common.Messaging;
-using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+    using LibrarySystem.UserIdentity.Data;
+    using LibrarySystem.UserIdentity.Iinterface;
+    using LibrarySystem.UserIdentity.Models;
+    using LibrarySystem.UserIdentity.Seed;
+    using LibrarySystem.UserIdentity.Services;
+    using LibrarySystem.Common.Middleware;
+    using LibrarySystem.Common.Messaging;
+    using MassTransit;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.IdentityModel.Tokens;
+    using System.Text;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
+    builder.Services.AddDbContext<IdentityDbContext>(options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("IdentityConnection")
+        ));
 
-builder.Services.AddDbContext<IdentityDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("IdentityConnection")
-    ));
-
-
-builder.Services.AddIdentity<User, IdentityRole<int>>()
-    .AddEntityFrameworkStores<IdentityDbContext>()
-    .AddDefaultTokenProviders();
-
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    builder.Services.AddAuthorization(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
+        options.AddPolicy("BookCreate",
+            p => p.RequireClaim("permission", "book.create"));
 
-        ValidateIssuer = true,
-        ValidIssuer = jwtSection["Issuer"],
+        options.AddPolicy("BorrowCreate",
+            p => p.RequireClaim("permission", "borrow.create"));
 
-        ValidateAudience = true,
-        ValidAudience = jwtSection["Audience"],
-
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
-});
+        options.AddPolicy("UserManage",
+            p => p.RequireClaim("permission", "user.manage"));
+    });
 
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
+
+    builder.Services.AddIdentity<User, IdentityRole<int>>()
+        .AddEntityFrameworkStores<IdentityDbContext>()
+        .AddDefaultTokenProviders();
 
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    var jwtSection = builder.Configuration.GetSection("Jwt");
+    var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);
+
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+
+            ValidateIssuer = true,
+            ValidIssuer = jwtSection["Issuer"],
+
+            ValidateAudience = true,
+            ValidAudience = jwtSection["Audience"],
+
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-    );
-});
+    builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<ITokenService, TokenService>();
+    builder.Services.AddScoped<PermissionService>();
 
 
-var rabbitSection = builder.Configuration.GetSection("RabbitMq");
-if (!rabbitSection.Exists())
-    throw new Exception("RabbitMq configuration section is missing");
+
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", policy =>
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+        );
+    });
+
+
+    var rabbitSection = builder.Configuration.GetSection("RabbitMq");
+    if (!rabbitSection.Exists())
+        throw new Exception("RabbitMq configuration section is missing");
 
 builder.Services.AddMassTransit(x =>
 {
@@ -84,61 +100,67 @@ builder.Services.AddMassTransit(x =>
             h.Password(rabbitSection["Password"]);
         });
 
+        // ?? ???? ??? Exchange ?? TOPIC
         cfg.Message<UserCreatedMessage>(m =>
         {
             m.SetEntityName(LibraryExchanges.Users);
         });
 
-        cfg.Message<UserUpdatedMessage>(m =>
+        cfg.Publish<UserCreatedMessage>(p =>
         {
-            m.SetEntityName(LibraryExchanges.Users);
+            p.ExchangeType = ExchangeType.Topic;
         });
 
-        cfg.Message<UserDeactivatedMessage>(m =>
+        cfg.Publish<UserUpdatedMessage>(p =>
         {
-            m.SetEntityName(LibraryExchanges.Users);
+            p.ExchangeType = ExchangeType.Topic;
         });
 
-        cfg.UseMessageRetry(r =>
-            r.Interval(3, TimeSpan.FromSeconds(5))
-        );
+        cfg.Publish<UserDeactivatedMessage>(p =>
+        {
+            p.ExchangeType = ExchangeType.Topic;
+        });
     });
 });
+
 
 
 var app = builder.Build();
 
 
-app.UseCors("AllowAll");
+    app.UseCors("AllowAll");
 
-app.UseSwagger();
-app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+    app.UseHttpsRedirection();
 
-app.UseMiddleware<LoggingMiddleware>("UserIdentity.API");
+    app.UseMiddleware<LoggingMiddleware>("UserIdentity.API");
 
-app.UseAuthentication();
+    app.UseAuthentication();
 
-app.UseStatusCodePages(async context =>
-{
-    context.HttpContext.Response.ContentType = "application/json";
-    await context.HttpContext.Response.WriteAsync(
-        $"{{\"statusCode\":{context.HttpContext.Response.StatusCode}}}"
-    );
-});
+    app.UseStatusCodePages(async context =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            $"{{\"statusCode\":{context.HttpContext.Response.StatusCode}}}"
+        );
+    });
 
-app.UseAuthorization();
+    app.UseAuthorization();
 
-app.MapControllers();
+    app.MapControllers();
 
 
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider
-        .GetRequiredService<RoleManager<IdentityRole<int>>>();
+    using (var scope = app.Services.CreateScope())
+    {
+        var roleManager = scope.ServiceProvider
+            .GetRequiredService<RoleManager<IdentityRole<int>>>();
 
-    await RoleSeeder.SeedAsync(roleManager);
-}
+        var db = scope.ServiceProvider
+            .GetRequiredService<IdentityDbContext>();
 
-app.Run();
+        await RoleSeeder.SeedAsync(roleManager, db);
+    }
+
+    app.Run();

@@ -21,4 +21,8 @@
     <ProjectReference Include="..\LibrarySystem.Common\LibrarySystem.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+
 </Project>

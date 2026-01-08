@@ -1,7 +1,8 @@
-﻿using LibrarySystem.Services.Interfaces;
+﻿using LibrarySystem.API.Helpers;
+using LibrarySystem.Services.Interfaces;
 using LibrarySystem.Shared.DTOs.BookDtos;
-using LibrarySystem.API.Helpers;
 using LibrarySystem.Shared.DTOs.HelperDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibrarySystem.API.Controllers
@@ -16,6 +17,7 @@ namespace LibrarySystem.API.Controllers
         {
             _service = service;
         }
+        [Authorize(Policy = "BookCreate")]
         [HttpPost]
         public async Task<IActionResult> AddBook([FromBody] BookCreateDto dto)
         {
@@ -192,11 +194,6 @@ namespace LibrarySystem.API.Controllers
                 Data = result,
                 Errors = errors
             });
-        }
-        [HttpGet("test-exception")]
-        public IActionResult TestException()
-        {
-            throw new Exception("TEST EXCEPTION FROM CONTROLLER");
         }
     }
 
