@@ -7,9 +7,11 @@ namespace LibrarySystem.UserIdentity.Seed
 {
     public static class RoleSeeder
     {
-        public static async Task SeedAsync(RoleManager<IdentityRole<int>> roleManager, IdentityDbContext db)
+        public static async Task SeedAsync(
+            RoleManager<IdentityRole<int>> roleManager,
+            IdentityDbContext db)
         {
-            var roles = new[] { "Admin", "Librarian", "User" };
+           var roles = new[] { "Admin", "Librarian", "User" };
 
             foreach (var role in roles)
             {
@@ -30,6 +32,7 @@ namespace LibrarySystem.UserIdentity.Seed
                 "borrow.return",
                 "borrow.view",
 
+                "category.manage",
                 "user.manage"
             };
 
@@ -37,21 +40,29 @@ namespace LibrarySystem.UserIdentity.Seed
             {
                 if (!await db.Permissions.AnyAsync(p => p.Name == perm))
                 {
-                    db.Permissions.Add(new Permission { Name = perm });
+                    db.Permissions.Add(new Permission
+                    {
+                        Name = perm
+                    });
                 }
             }
 
             await db.SaveChangesAsync();
 
+
             await Assign(db, "Admin", permissions);
+
             await Assign(db, "Librarian", new[]
             {
                 "book.create",
                 "book.update",
                 "book.view",
+
                 "borrow.create",
                 "borrow.return",
-                "borrow.view"
+                "borrow.view",
+
+                "category.manage"
             });
 
             await Assign(db, "User", new[]
@@ -61,7 +72,7 @@ namespace LibrarySystem.UserIdentity.Seed
             });
         }
 
-        private static async Task Assign( IdentityDbContext db,string roleName,  string[] permissions)
+        private static async Task Assign(IdentityDbContext db,string roleName,string[] permissions)
         {
             var role = await db.Roles.FirstAsync(r => r.Name == roleName);
 
@@ -85,7 +96,5 @@ namespace LibrarySystem.UserIdentity.Seed
 
             await db.SaveChangesAsync();
         }
-
-
     }
 }

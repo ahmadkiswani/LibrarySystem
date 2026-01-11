@@ -87,41 +87,20 @@ namespace LibrarySystem.UserIdentity.Controllers
                 );
             }
         }
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpPost("deactivate")]
         public async Task<IActionResult> Deactivate([FromBody] DeactivateUserDto dto)
         {
-            var validationErrors = ValidationHelper.Validate(dto);
-            if (validationErrors.Any())
-            {
-                return BadRequest(
-                    BaseResponse<string>.FailureResponse(
-                        "Validation failed",
-                        validationErrors
-                    )
-                );
-            }
+            await _userService.DeactivateAsync(dto);
 
-            try
-            {
-                await _userService.DeactivateAsync(dto);
-
-                return Ok(
-                    BaseResponse<string>.SuccessResponse(
-                        null!,
-                        "User deactivated successfully"
-                    )
-                );
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(
-                    BaseResponse<string>.FailureResponse(
-                        ex.Message
-                    )
-                );
-            }
+            return Ok(
+                BaseResponse<string>.SuccessResponse(
+                    null!,
+                    "User deactivated successfully"
+                )
+            );
         }
+
         [Authorize]
         [HttpPut("update")]
         public async Task<IActionResult> Update([FromBody] UpdateUserDto dto)

@@ -10,11 +10,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using RabbitMQ.Client;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+#region Controllers + Validation
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
@@ -38,13 +39,15 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+#endregion
 
-
+#region Database
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+#endregion
 
-
+#region JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);
 
@@ -59,27 +62,66 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
+
         ValidateIssuer = true,
         ValidIssuer = jwtSection["Issuer"],
+
         ValidateAudience = true,
         ValidAudience = jwtSection["Audience"],
+
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
 });
+#endregion
 
-builder.Services.AddAuthorization();
+#region Authorization Policies (?? ???????)
+builder.Services.AddAuthorization(options =>
+{
+    // ===== BOOK =====
+    options.AddPolicy("BookCreate",
+        p => p.RequireClaim("permission", "book.create"));
 
+    options.AddPolicy("BookUpdate",
+        p => p.RequireClaim("permission", "book.update"));
 
+    options.AddPolicy("BookDelete",
+        p => p.RequireClaim("permission", "book.delete"));
+
+    options.AddPolicy("BookView",
+        p => p.RequireClaim("permission", "book.view"));
+
+    // ===== BORROW =====
+    options.AddPolicy("BorrowCreate",
+        p => p.RequireClaim("permission", "borrow.create"));
+
+    options.AddPolicy("BorrowReturn",
+        p => p.RequireClaim("permission", "borrow.return"));
+
+    options.AddPolicy("BorrowView",
+        p => p.RequireClaim("permission", "borrow.view"));
+
+    // ===== CATEGORY =====
+    options.AddPolicy("CategoryManage",
+        p => p.RequireClaim("permission", "category.manage"));
+
+    // ===== USER =====
+    options.AddPolicy("UserManage",
+        p => p.RequireClaim("permission", "user.manage"));
+});
+#endregion
+
+#region CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyHeader()
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
-              .AllowAnyOrigin());
+              .AllowAnyHeader());
 });
+#endregion
 
-
+#region RabbitMQ + MassTransit
 var rabbitSection = builder.Configuration.GetSection("RabbitMq");
 if (!rabbitSection.Exists())
     throw new Exception("RabbitMq configuration section is missing");
@@ -96,44 +138,45 @@ builder.Services.AddMassTransit(x =>
         {
             h.Username(rabbitSection["Username"]);
             h.Password(rabbitSection["Password"]);
-
         });
 
         cfg.ReceiveEndpoint(LibraryQueues.UserCreated, e =>
         {
+            e.ConfigureConsumeTopology = false;
             e.Bind(LibraryExchanges.Users, s =>
             {
+                s.ExchangeType = ExchangeType.Topic;
                 s.RoutingKey = LibraryRoutingKeys.UserCreated;
-                s.ExchangeType = "topic";
             });
-
             e.ConfigureConsumer<UserCreatedConsumer>(context);
         });
 
         cfg.ReceiveEndpoint(LibraryQueues.UserUpdated, e =>
         {
+            e.ConfigureConsumeTopology = false;
             e.Bind(LibraryExchanges.Users, s =>
             {
+                s.ExchangeType = ExchangeType.Topic;
                 s.RoutingKey = LibraryRoutingKeys.UserUpdated;
-                s.ExchangeType = "topic";
             });
-
             e.ConfigureConsumer<UserUpdatedConsumer>(context);
         });
 
         cfg.ReceiveEndpoint(LibraryQueues.UserDeactivated, e =>
         {
+            e.ConfigureConsumeTopology = false;
             e.Bind(LibraryExchanges.Users, s =>
             {
+                s.ExchangeType = ExchangeType.Topic;
                 s.RoutingKey = LibraryRoutingKeys.UserDeactivated;
-                s.ExchangeType = "topic";
             });
-
             e.ConfigureConsumer<UserDeactivatedConsumer>(context);
         });
     });
 });
+#endregion
 
+#region Services
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IBookService, BookService>();
@@ -142,34 +185,24 @@ builder.Services.AddScoped<IBorrowService, BorrowService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
+#endregion
 
 var app = builder.Build();
 
+#region Middleware Pipeline
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();   
 app.UseAuthorization();
 
 app.UseMiddleware<LoggingMiddleware>("LibrarySystem.API");
 
 app.MapControllers();
+#endregion
+
 app.Run();
-
-
-public class BorrowOverdueBackgroundService : BackgroundService
-{
-    private readonly IServiceScopeFactory _scopeFactory;
-    public BorrowOverdueBackgroundService(IServiceScopeFactory scopeFactory)
-    {
-        _scopeFactory = scopeFactory;
-    }
-
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        return Task.CompletedTask;
-    }
-}

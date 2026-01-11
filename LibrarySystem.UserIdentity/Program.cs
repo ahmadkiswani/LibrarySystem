@@ -100,8 +100,17 @@ builder.Services.AddMassTransit(x =>
             h.Password(rabbitSection["Password"]);
         });
 
-        // ?? ???? ??? Exchange ?? TOPIC
         cfg.Message<UserCreatedMessage>(m =>
+        {
+            m.SetEntityName(LibraryExchanges.Users);
+        });
+
+        cfg.Message<UserUpdatedMessage>(m =>
+        {
+            m.SetEntityName(LibraryExchanges.Users);
+        });
+
+        cfg.Message<UserDeactivatedMessage>(m =>
         {
             m.SetEntityName(LibraryExchanges.Users);
         });
@@ -122,7 +131,6 @@ builder.Services.AddMassTransit(x =>
         });
     });
 });
-
 
 
 var app = builder.Build();

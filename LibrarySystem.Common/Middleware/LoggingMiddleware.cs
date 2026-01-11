@@ -1,7 +1,6 @@
 ﻿using LibrarySystem.Common.Messaging;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http;
 using System.Text;
 
 namespace LibrarySystem.Common.Middleware

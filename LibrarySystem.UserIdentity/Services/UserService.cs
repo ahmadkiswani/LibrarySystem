@@ -116,4 +116,6 @@ public class UserService : IUserService
             ctx.SetRoutingKey(LibraryRoutingKeys.UserDeactivated);
         });
     }
+
+
 }
