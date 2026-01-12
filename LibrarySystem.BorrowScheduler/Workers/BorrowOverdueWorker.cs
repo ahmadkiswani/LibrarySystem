@@ -1,6 +1,5 @@
 ﻿using LibrarySystem.Domain.Repositories;
 using LibrarySystem.Entities.Models;
-using LibrarySystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.BorrowScheduler.Workers;
@@ -18,29 +17,45 @@ public class BorrowOverdueWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("BorrowOverdueWorker started.");
-
         while (!stoppingToken.IsCancellationRequested)
         {
             using var scope = _scopeFactory.CreateScope();
-
             var borrowRepo = scope.ServiceProvider.GetRequiredService<IGenericRepository<Borrow>>();
-            var borrowService = scope.ServiceProvider.GetRequiredService<IBorrowService>();
 
-            var now = DateTime.UtcNow;
+            var today = DateTime.UtcNow.Date;
 
-            var overdueBorrowIds = await borrowRepo.GetQueryable()
-                .Where(b => b.Status == BorrowStatus.Borrowed && b.DueDate < now)
-                .Select(b => b.Id)
+            var toOverdue = await borrowRepo.GetQueryable()
+                .Where(b =>
+                    b.Status == BorrowStatus.Borrowed &&
+                    b.DueDate.Date < today
+                )
                 .ToListAsync(stoppingToken);
 
-            _logger.LogInformation("Found {Count} overdue borrows at {Time}", overdueBorrowIds.Count, now);
-
-            foreach (var id in overdueBorrowIds)
+            foreach (var borrow in toOverdue)
             {
-             
-                await borrowService.MarkOverdueAsync(id);
+                borrow.Status = BorrowStatus.Overdue;
+                borrow.OverdueDays = (today - borrow.DueDate.Date).Days;
+
+                await borrowRepo.UpdateAsync(borrow);
             }
+
+            var overdueBorrows = await borrowRepo.GetQueryable()
+                .Where(b => b.Status == BorrowStatus.Overdue)
+                .ToListAsync(stoppingToken);
+
+            foreach (var borrow in overdueBorrows)
+            {
+                var days = (today - borrow.DueDate.Date).Days;
+                if (days < 0) days = 0;
+
+                if (borrow.OverdueDays != days)
+                {
+                    borrow.OverdueDays = days;
+                    await borrowRepo.UpdateAsync(borrow);
+                }
+            }
+
+            await borrowRepo.SaveAsync();
 
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }

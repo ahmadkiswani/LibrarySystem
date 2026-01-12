@@ -2,6 +2,10 @@ using LibrarySystem.BorrowScheduler.Workers;
 using LibrarySystem.Domain.Data;
 using LibrarySystem.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using LibrarySystem.Services;
+using LibrarySystem.Services.Interfaces;
+using MassTransit;
+
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -17,7 +21,20 @@ builder.Services.AddDbContext<LibraryDbContext>(options =>
             );
         }
     ));
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+    });
+});
 
+
+builder.Services.AddScoped<IBorrowService, BorrowService>();
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddHostedService<BorrowOverdueWorker>();
