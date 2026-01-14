@@ -1,7 +1,5 @@
 ﻿using LibrarySystem.Logging.DTOs;
 using LibrarySystem.Logging.Models;
-using LibrarySystem.Logging.Settings;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace LibrarySystem.Logging.Services
@@ -14,15 +12,13 @@ namespace LibrarySystem.Logging.Services
         private readonly IMongoCollection<ExceptionLog> _exceptionLogsLibrary;
         private readonly IMongoCollection<ExceptionLog> _exceptionLogsIdentity;
 
-        public MongoLogService(IOptions<MongoSettings> settings)
+        public MongoLogService(IMongoDatabase db)
         {
-            var client = new MongoClient(settings.Value.ConnectionString);
-            var db = client.GetDatabase(settings.Value.DatabaseName);
+            _httpLogsLibrary = db.GetCollection<HttpLog>("http_logs_library");
+            _httpLogsIdentity = db.GetCollection<HttpLog>("http_logs_identity");
 
-            _httpLogsLibrary = db.GetCollection<HttpLog>(settings.Value.HttpLogsLibraryCollection);
-            _httpLogsIdentity = db.GetCollection<HttpLog>(settings.Value.HttpLogsIdentityCollection);
-            _exceptionLogsLibrary = db.GetCollection<ExceptionLog>(settings.Value.ExceptionLogsLibraryCollection);
-            _exceptionLogsIdentity = db.GetCollection<ExceptionLog>(settings.Value.ExceptionLogsIdentityCollection);
+            _exceptionLogsLibrary = db.GetCollection<ExceptionLog>("exception_logs_library");
+            _exceptionLogsIdentity = db.GetCollection<ExceptionLog>("exception_logs_identity");
         }
 
         private bool IsIdentity(string? serviceName)
@@ -71,7 +67,7 @@ namespace LibrarySystem.Logging.Services
                 ServiceName = dto.ServiceName,
                 Message = dto.Message,
                 Request = dto.Request,
-                Response = dto.Response,
+                Response = dto.Response
             };
 
             if (IsIdentity(dto.ServiceName))
@@ -79,6 +75,5 @@ namespace LibrarySystem.Logging.Services
             else
                 await _exceptionLogsLibrary.InsertOneAsync(log);
         }
-
     }
 }

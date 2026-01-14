@@ -14,13 +14,7 @@ namespace LibrarySystem.Entities.Models
 
         [Required, EmailAddress, MaxLength(50)]
         public string UserEmail { get; set; } = string.Empty;
-
-        public int? UserTypeId { get; set; }
-        public UserType? UserType { get; set; }
-
         public int ExternalUserId { get; set; }
-
-
         public User? CreatedByUser { get; set; }
         public User? LastModifiedByUser { get; set; }
         public User? DeletedByUser { get; set; }

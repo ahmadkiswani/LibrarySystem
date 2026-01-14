@@ -5,16 +5,34 @@ using LibrarySystem.Logging.Settings;
 using MassTransit;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
+        // Mongo Settings
         services.Configure<MongoSettings>(
             context.Configuration.GetSection("MongoSettings"));
 
-        services.AddSingleton<MongoLogService>();
+        // Mongo Infrastructure
+        services.AddSingleton<IMongoClient>(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+            return new MongoClient(settings.ConnectionString);
+        });
 
+        services.AddScoped<IMongoDatabase>(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+            return sp.GetRequiredService<IMongoClient>()
+                     .GetDatabase(settings.DatabaseName);
+        });
+
+        // Logging Service
+        services.AddScoped<MongoLogService>();
+
+       
         services.AddMassTransit(x =>
         {
             x.AddConsumer<LogRequestConsumer>();

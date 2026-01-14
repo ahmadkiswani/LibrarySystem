@@ -14,7 +14,6 @@ namespace LibrarySystem.Domain.Data
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<Borrow> Borrows { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<UserType> UserTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,32 +66,8 @@ namespace LibrarySystem.Domain.Data
                 .WithMany()
                 .HasForeignKey(u => u.DeletedBy)
                 .OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.UserType)
-                .WithMany()
-                .HasForeignKey(u => u.UserTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<UserType>().HasData(
-                new UserType { Id = 1, TypeName = "Admin" },
-                new UserType { Id = 2, TypeName = "Librarian" },
-                new UserType { Id = 3, TypeName = "Member" });
-            modelBuilder.Entity<User>().HasData(
-                new User
-                {
-                 Id = 1,
-                 UserName = "admin",
-                 UserEmail = "admin@library.com",
-                 UserTypeId = 1,
-                 CreatedBy = null,
-                 CreatedDate = new DateTime(2025, 1, 1),
-                    LastModifiedBy = null,
-                 LastModifiedDate = null,
-                 DeletedBy = null,
-                 DeletedDate = null,
-                 IsDeleted = false
-                }
-            );   
+        
+               
 
 
         }

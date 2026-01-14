@@ -10,14 +10,11 @@ namespace LibrarySystem.Services
     public class UserService : IUserService
     {
         private readonly IGenericRepository<User> _userRepo;
-        private readonly IGenericRepository<UserType> _userTypeRepo;
 
         public UserService(
-            IGenericRepository<User> userRepo,
-            IGenericRepository<UserType> userTypeRepo)
+            IGenericRepository<User> userRepo)
         {
             _userRepo = userRepo;
-            _userTypeRepo = userTypeRepo;
         }
 
 
@@ -73,15 +70,13 @@ namespace LibrarySystem.Services
         public async Task<List<UserListDto>> ListUsers()
         {
             var users = await _userRepo.FindAsync(
-                u => true,
-                q => q.Include(u => u.UserType)
+                u => true
             );
 
             return users.Select(u => new UserListDto
             {
                 Id = u.Id,
                 UserName = u.UserName,
-                UserTypeName = u.UserType != null ? u.UserType.TypeName : "Unknown"
             }).ToList();
         }
         public async Task<UserDetailsDto> GetUserDetails(int id)
